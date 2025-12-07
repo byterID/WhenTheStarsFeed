@@ -9,9 +9,12 @@ public class Tower : MonoBehaviour
     private Transform _Dynamic;
     private bool _isReloading;
 
+    private SoundFeedback soundFeedback; //звуки
+
     private void Awake()
     {
         _Dynamic = GameObject.Find("_Dynamic").transform;
+        soundFeedback = GameObject.Find("SoundFeedback").GetComponent<SoundFeedback>();
     }
 
     private void OnTriggerStay(Collider other)
@@ -27,6 +30,7 @@ public class Tower : MonoBehaviour
         GameObject bullet = Instantiate(_bulletPrefab, _bulletSpawnTransform);
         bullet.transform.SetParent(_Dynamic);
         bullet.GetComponent<Bullet>().target = targetTransform;
+        soundFeedback.PlaySound(SoundType.shoot);
         StartCoroutine(StartReload());
     }
     
