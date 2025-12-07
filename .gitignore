@@ -1,0 +1,18 @@
+# === IDE / редакторы ===
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === Игнорировать всё остальное ===
+*
+
+# === Разрешённые файлы ===
+!.gitignore
+!gitflow.md
+!workflow.md
+!codestyle.md
+
+# === Разрешённая папки ===
+!images/
+!images/**
