@@ -6,7 +6,7 @@ public class PlacementState : IBuildingState
     int ID;                                     // ID выбранного объекта, который пытаемся разместить
     Grid grid;
     PreviewSystem previewSystem;
-    ObjectsDatabaseSO database;
+    TowersDatabaseSO database;
     GridData floorData;
     GridData furnitureData;
     ObjectPlacer objectPlacer;
@@ -15,7 +15,7 @@ public class PlacementState : IBuildingState
     public PlacementState(int iD,
                           Grid grid,
                           PreviewSystem previewSystem,
-                          ObjectsDatabaseSO database,
+                          TowersDatabaseSO database,
                           GridData floorData,
                           GridData furnitureData,
                           ObjectPlacer objectPlacer,

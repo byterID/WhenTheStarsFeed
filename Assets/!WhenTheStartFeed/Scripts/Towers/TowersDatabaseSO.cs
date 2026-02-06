@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ObjectsDatabaseSO", menuName = "Scriptable Objects/ObjectsDatabaseSO")]
-public class ObjectsDatabaseSO : ScriptableObject
+[CreateAssetMenu(fileName = "TowersDatabaseSO", menuName = "Scriptable Objects/TowersDatabaseSO")]
+public class TowersDatabaseSO : ScriptableObject
 {
-    public List<ObjectData> objectsData;
+    public List<TowersData> objectsData;
 }
 
 [Serializable]
-public class ObjectData
+public class TowersData
 {
     [field:SerializeField] 
     public string Name {get; private set; }

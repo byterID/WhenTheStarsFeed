@@ -5,7 +5,7 @@ public class PlacementSystem : MonoBehaviour //
     [SerializeField] private InputManager inputManager; // управляет получением позиции курсора, кликами, выходом из режима и т.д.
     [SerializeField] private Grid grid;
 
-    [SerializeField] private ObjectsDatabaseSO database; // база всех объектов для установки
+    [SerializeField] private TowersDatabaseSO database; // база всех объектов для установки
 
     [SerializeField] private GameObject gridVisualization; // визуализирует сетку для размещения
 

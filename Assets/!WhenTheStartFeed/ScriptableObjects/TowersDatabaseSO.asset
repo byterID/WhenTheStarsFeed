@@ -9,19 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f3b39a93be7fac429bb4eea436e2fed, type: 3}
-  m_Name: ObjectsDatabaseSO
-  m_EditorClassIdentifier: Assembly-CSharp::ObjectsDatabaseSO
+  m_Script: {fileID: 11500000, guid: 05a875c2333cd1c4abd6f6cb2ddd6328, type: 3}
+  m_Name: TowersDatabaseSO
+  m_EditorClassIdentifier: Assembly-CSharp::TowersDatabaseSO
   objectsData:
-  - <Name>k__BackingField: Cube1
+  - <Name>k__BackingField: Tower 1x1
     <ID>k__BackingField: 1
     <Size>k__BackingField: {x: 1, y: 1}
     <Prefab>k__BackingField: {fileID: 5082994244688903197, guid: cd9799fc75c326c4ebdec1d969c954e4, type: 3}
-  - <Name>k__BackingField: Cube21
+  - <Name>k__BackingField: Tower 2x1
     <ID>k__BackingField: 2
-    <Size>k__BackingField: {x: 2, y: 1}
+    <Size>k__BackingField: {x: 1, y: 1}
     <Prefab>k__BackingField: {fileID: 3260189430894577903, guid: 4d8d80ee3ca8c7b4ab4d01f0a9559d1b, type: 3}
-  - <Name>k__BackingField: Cube22
+  - <Name>k__BackingField: Tower 2x2
     <ID>k__BackingField: 3
     <Size>k__BackingField: {x: 2, y: 2}
     <Prefab>k__BackingField: {fileID: 6611990278121539394, guid: cfc8106f057b5694895d35276834ef54, type: 3}

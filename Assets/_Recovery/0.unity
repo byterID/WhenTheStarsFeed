@@ -913,11 +913,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 548399963}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ebf24fee4216494db53865afa379b21, type: 3}
+  m_Script: {fileID: 11500000, guid: cdddaa4698254bf4494f356b474f145d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  _spawnPoint: {fileID: 0}
-  _multipleSpawnPoints: []
+  m_EditorClassIdentifier: Assembly-CSharp::EnemiesToWaves
+  enemiesDatabase: {fileID: 11400000, guid: a0c9e08a03fffab4a8c751eb0d104b0c, type: 2}
+  wavesDatabase: {fileID: 11400000, guid: 4349f70ea0d9bbc448139954a07a8772, type: 2}
 --- !u!1 &638601314
 GameObject:
   m_ObjectHideFlags: 0
