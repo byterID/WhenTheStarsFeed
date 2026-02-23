@@ -14,6 +14,7 @@ public class EnemiesData
     [field: SerializeField] public string enemyName { get; private set; }
     [field: SerializeField] public int ID { get; private set; }
     [field: SerializeField] public float health { get; private set; }
+    [field: SerializeField] public float resistance { get; private set; }
     [field: SerializeField] public float moveSpeed { get; private set; }
     [field: SerializeField] public GameObject prefab { get; private set; }
     [field: SerializeField] public int reward { get; private set; } //награда

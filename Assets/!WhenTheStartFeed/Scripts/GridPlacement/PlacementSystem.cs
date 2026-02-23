@@ -21,6 +21,8 @@ public class PlacementSystem : MonoBehaviour //
 
     [SerializeField] private SoundFeedback soundFeedback; //звуки
 
+    [SerializeField] private MoneyManager moneyManager;//деньги
+
     private void Start()
     {
         gridVisualization.SetActive(false); // Грид скрыт, пока игрок не начнёт размещение
@@ -39,7 +41,8 @@ public class PlacementSystem : MonoBehaviour //
                                            floorData,
                                            furnitureData,
                                            objectPlacer,
-                                           soundFeedback);
+                                           soundFeedback,
+                                           moneyManager);
         inputManager.OnClicked += PlaceStructure;               // подписываемся на событие установки объекта
         inputManager.OnExit += StopPlacement;                   // подписываемся на кнопку выхода
     }
@@ -53,17 +56,15 @@ public class PlacementSystem : MonoBehaviour //
         inputManager.OnExit += StopPlacement;
     }
 
-    private void PlaceStructure()//Установка структуры
+    private void PlaceStructure()
     {
-        if(inputManager.IsPointerOverUI()) 
-        {
-            return;                                             //не пропускаем нажатие через UI
-        }
-        Vector3 mousePosition = inputManager.GetSelectedMapPosition(); // Берём позицию курсора в мире
-        Vector3Int gridPosition = grid.WorldToCell(mousePosition);     // Конвертируем в позицию сетки
+        if (inputManager.IsPointerOverUI())
+            return;
 
-        buildingState.OnAction(gridPosition);                           // Передаем действие текущему состоянию
+        Vector3 mousePosition = inputManager.GetSelectedMapPosition();
+        Vector3Int gridPosition = grid.WorldToCell(mousePosition);
 
+        buildingState.OnAction(gridPosition);
     }
     private void StopPlacement()//Завершение режима(на ESC)
     {

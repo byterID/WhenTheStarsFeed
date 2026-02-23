@@ -4,7 +4,10 @@ public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] private Transform _spawnPoint; //одна точка спавна
     [SerializeField] private Transform[] _multipleSpawnPoints; //много точек спавка
+    [SerializeField] private Transform[] _path;
     private int _randomIndex;
+
+    [SerializeField] private GameObject _enemyPrefab;
 
     private void RandomizeEnemySpawnPoint()
     {
@@ -28,6 +31,12 @@ public class EnemySpawner : MonoBehaviour
             GameObject enemy = Instantiate(enemyPrefab[i], _multipleSpawnPoints[_randomIndex]);
             enemy.transform.SetParent(DynamicRoot.Root);
         }
+    }
+
+    public void SpawnEnemy()//тестировочный спавн
+    {
+        GameObject enemy = Instantiate(_enemyPrefab, _spawnPoint);
+        enemy.GetComponent<EnemyMovement>().moveTargets = _path;
     }
 }
 

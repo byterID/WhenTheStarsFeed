@@ -11,6 +11,7 @@ public class PlacementState : IBuildingState
     GridData furnitureData;
     ObjectPlacer objectPlacer;
     SoundFeedback soundFeedback;
+    MoneyManager moneyManager;
 
     public PlacementState(int iD,
                           Grid grid,
@@ -19,7 +20,8 @@ public class PlacementState : IBuildingState
                           GridData floorData,
                           GridData furnitureData,
                           ObjectPlacer objectPlacer,
-                          SoundFeedback soundFeedback)
+                          SoundFeedback soundFeedback,
+                          MoneyManager moneyManager)
     {
         ID = iD;                                //сохраняем id выбранного объекта
         this.grid = grid;                       //ссылки на нужные сущности
@@ -29,6 +31,7 @@ public class PlacementState : IBuildingState
         this.furnitureData = furnitureData;
         this.objectPlacer = objectPlacer;
         this.soundFeedback = soundFeedback;
+        this.moneyManager = moneyManager;
 
         selectedObjectIndex = database.objectsData.FindIndex(data => data.ID == ID);    //находим объект в базе по id
         if (selectedObjectIndex > -1)                                                   // Если объект найден, то запускаем предпросмотр
@@ -47,28 +50,46 @@ public class PlacementState : IBuildingState
         previewSystem.StopShowingPreview();
     }
 
-    public void OnAction(Vector3Int gridPosition) // вызывается при клике - попытка разместить объект
+    public void OnAction(Vector3Int gridPosition)
     {
+        // Проверяем, можно ли разместить объект
+        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex); // проверяем, можно ли ставить объект в точку
         if (placementValidity == false)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);// если нельзя - звук ошибки и выход
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place); // если можно - звук размещения
-        int index = objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, // создаём реальный объект и получаем его индекс в ObjectPlacer
+
+        // ПОЛУЧАЕМ ЦЕНУ БАШНИ
+        int towerCost = database.objectsData[selectedObjectIndex].Cost;
+
+        // ПРОВЕРЯЕМ, ХВАТАЕТ ЛИ ДЕНЕГ
+        if (!moneyManager.TrySpend(towerCost))
+        {
+            Debug.Log("Недостаточно денег! Нужно: " + towerCost + ", есть: " + moneyManager.CurrentMoney);
+            //soundFeedback.PlaySound(SoundType.wrongPlacement); звук для недостатка денег
+            return;
+        }
+
+        // Размещаем объект
+        int index = objectPlacer.PlaceObject(
+            database.objectsData[selectedObjectIndex].Prefab,
             grid.CellToWorld(gridPosition));
 
-        GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ? //хуйня с туториала ИСПРАВИТЬ!!
-            floorData :
-            furnitureData;
+        // Обновляем данные о занятости клеток
+        GridData selectedData = furnitureData;
         selectedData.AddObjectAt(gridPosition,
             database.objectsData[selectedObjectIndex].Size,
             database.objectsData[selectedObjectIndex].ID,
             index);
 
         previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), false);
+
+        // Звук успешной установки
+        soundFeedback.PlaySound(SoundType.Place);
+
+        Debug.Log("Башня куплена! Осталось денег: " + moneyManager.CurrentMoney);
     }
 
     private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)  // Проверяет, можно ли ставить объект в указанную позицию

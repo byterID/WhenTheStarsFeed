@@ -22,6 +22,7 @@ public class Waves : MonoBehaviour
     }
 
     IEnumerator RunWave(WaveData wave)
+
     {
         // Время подготовки перед стартом волны
         yield return new WaitForSeconds(wave.preparationTime);

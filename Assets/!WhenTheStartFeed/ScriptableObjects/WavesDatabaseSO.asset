@@ -136,12 +136,60 @@ MonoBehaviour:
       <reward>k__BackingField: 0
       <minWave>k__BackingField: 5
       <maxWave>k__BackingField: 6
+    - <enemyName>k__BackingField: "\u0444\u044B\u0432\u0444\u044B\u0432\u0444\u044B\u0432"
+      <ID>k__BackingField: 3
+      <health>k__BackingField: 22
+      <moveSpeed>k__BackingField: 5
+      <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
+      <reward>k__BackingField: 0
+      <minWave>k__BackingField: 5
+      <maxWave>k__BackingField: 6
+    - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
+      <ID>k__BackingField: 3
+      <health>k__BackingField: 22
+      <moveSpeed>k__BackingField: 5
+      <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
+      <reward>k__BackingField: 0
+      <minWave>k__BackingField: 5
+      <maxWave>k__BackingField: 6
+    - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
+      <ID>k__BackingField: 3
+      <health>k__BackingField: 22
+      <moveSpeed>k__BackingField: 5
+      <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
+      <reward>k__BackingField: 0
+      <minWave>k__BackingField: 5
+      <maxWave>k__BackingField: 6
     enemyCount: 0
   - <waveIndex>k__BackingField: 6
     <waveDuration>k__BackingField: 0
     preparationTime: 0
     spawnCooldown: 0
     enemies:
+    - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
+      <ID>k__BackingField: 3
+      <health>k__BackingField: 22
+      <moveSpeed>k__BackingField: 5
+      <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
+      <reward>k__BackingField: 0
+      <minWave>k__BackingField: 5
+      <maxWave>k__BackingField: 6
+    - <enemyName>k__BackingField: "\u0444\u044B\u0432\u0444\u044B\u0432\u0444\u044B\u0432"
+      <ID>k__BackingField: 3
+      <health>k__BackingField: 22
+      <moveSpeed>k__BackingField: 5
+      <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
+      <reward>k__BackingField: 0
+      <minWave>k__BackingField: 5
+      <maxWave>k__BackingField: 6
+    - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
+      <ID>k__BackingField: 3
+      <health>k__BackingField: 22
+      <moveSpeed>k__BackingField: 5
+      <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
+      <reward>k__BackingField: 0
+      <minWave>k__BackingField: 5
+      <maxWave>k__BackingField: 6
     - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
       <ID>k__BackingField: 3
       <health>k__BackingField: 22
