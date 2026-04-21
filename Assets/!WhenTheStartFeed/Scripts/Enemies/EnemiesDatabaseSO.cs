@@ -17,7 +17,6 @@ public class EnemiesData
     [field: SerializeField] public float resistance { get; private set; }
     [field: SerializeField] public float moveSpeed { get; private set; }
     [field: SerializeField] public GameObject prefab { get; private set; }
-    [field: SerializeField] public int reward { get; private set; } //награда
     [field: SerializeField] public int minWave { get; private set; } // с какой волны может появляться
     [field: SerializeField] public int maxWave { get; private set; } // до какой волны
 }

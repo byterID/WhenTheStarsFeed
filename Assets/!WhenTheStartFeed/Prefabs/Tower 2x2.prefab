@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 988041092160121260}
   - component: {fileID: 1972365681255757789}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -111,6 +111,75 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &3031288735328245497
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1966068887781591909}
+  - component: {fileID: 5629943257520073050}
+  - component: {fileID: 8324285071430976572}
+  m_Layer: 0
+  m_Name: Trigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1966068887781591909
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3031288735328245497}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1741641415243099793}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &5629943257520073050
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3031288735328245497}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 10
+  m_Center: {x: 1.02, y: 0, z: 0.96}
+--- !u!114 &8324285071430976572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3031288735328245497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55e2721cea673f04f84e4abf7b538c74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tower
+  _bulletPrefab: {fileID: 1253497764981070148, guid: bc1bc2941c54d1045bcd96687041b5f2, type: 3}
+  _reloadTime: 2
+  _bulletSpawnTransform: {fileID: 9068191609664289152}
 --- !u!1 &6611990278121539394
 GameObject:
   m_ObjectHideFlags: 0
@@ -120,8 +189,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1741641415243099793}
-  - component: {fileID: 5085093189970994091}
-  - component: {fileID: 315761477390052918}
+  - component: {fileID: 8609682096334602470}
   m_Layer: 0
   m_Name: Tower 2x2
   m_TagString: Untagged
@@ -138,15 +206,16 @@ Transform:
   m_GameObject: {fileID: 6611990278121539394}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.21425, y: 0.01, z: 6.92886}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5885746586187496212}
   - {fileID: 9068191609664289152}
+  - {fileID: 1966068887781591909}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5085093189970994091
+--- !u!114 &8609682096334602470
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -155,34 +224,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6611990278121539394}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55e2721cea673f04f84e4abf7b538c74, type: 3}
+  m_Script: {fileID: 11500000, guid: 0c0e4fd487fe46345a34fa4c5744e60e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Tower
-  _bulletPrefab: {fileID: 1253497764981070148, guid: bc1bc2941c54d1045bcd96687041b5f2, type: 3}
-  _reloadTime: 2
-  _bulletSpawnTransform: {fileID: 9068191609664289152}
-  _Dynamic: {fileID: 0}
---- !u!135 &315761477390052918
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6611990278121539394}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 8.48
-  m_Center: {x: 1.02, y: 0, z: 0.96}
+  m_EditorClassIdentifier: Assembly-CSharp::TowerClickHandler
+  towerID: 0
+  gridCell: {x: 0, y: 0, z: 0}
 --- !u!1 &8552379698966728389
 GameObject:
   m_ObjectHideFlags: 0
@@ -195,8 +241,8 @@ GameObject:
   - component: {fileID: 8983434958253093257}
   - component: {fileID: 3348386191956996481}
   - component: {fileID: 7418320674213659191}
-  m_Layer: 0
-  m_Name: Cube22
+  m_Layer: 8
+  m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -292,5 +338,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1.28, y: 3.01, z: 1.26}
+  m_Center: {x: 0, y: 1.09, z: 0}

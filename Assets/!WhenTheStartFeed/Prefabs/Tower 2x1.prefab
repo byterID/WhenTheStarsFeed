@@ -251,7 +251,7 @@ Transform:
   m_GameObject: {fileID: 3260189430894577903}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.48559, y: 0.5, z: 0.24991}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -274,7 +274,6 @@ MonoBehaviour:
   _bulletPrefab: {fileID: 1253497764981070148, guid: bc1bc2941c54d1045bcd96687041b5f2, type: 3}
   _reloadTime: 2
   _bulletSpawnTransform: {fileID: 3494581538866937585}
-  _Dynamic: {fileID: 0}
 --- !u!135 &7024781555154476750
 SphereCollider:
   m_ObjectHideFlags: 0

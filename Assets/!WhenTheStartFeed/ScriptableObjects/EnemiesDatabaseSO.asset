@@ -13,75 +13,19 @@ MonoBehaviour:
   m_Name: EnemiesDatabaseSO
   m_EditorClassIdentifier: Assembly-CSharp::EnemiesDatabaseSO
   enemiesData:
-  - <enemyName>k__BackingField: "\u0423\u0435\u0431\u0438\u0449\u0435"
+  - <enemyName>k__BackingField: "\u0411\u043E\u043C\u0436"
     <ID>k__BackingField: 1
-    <health>k__BackingField: 5
-    <moveSpeed>k__BackingField: 3
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 0
-    <maxWave>k__BackingField: 1
-  - <enemyName>k__BackingField: "\u0427\u0443\u0434\u043E\u0432\u0438\u0449\u0435"
-    <ID>k__BackingField: 2
     <health>k__BackingField: 10
-    <moveSpeed>k__BackingField: 5
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 1
-    <maxWave>k__BackingField: 2
-  - <enemyName>k__BackingField: "\u0414\u043E\u043B\u0431\u043E\u0435\u0431\u0438\u0449\u0435"
-    <ID>k__BackingField: 3
-    <health>k__BackingField: 14
-    <moveSpeed>k__BackingField: 7
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 2
+    <resistance>k__BackingField: 3
+    <moveSpeed>k__BackingField: 1
+    <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+    <minWave>k__BackingField: 0
     <maxWave>k__BackingField: 3
-  - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u0435"
-    <ID>k__BackingField: 3
-    <health>k__BackingField: 18
-    <moveSpeed>k__BackingField: 10
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 3
-    <maxWave>k__BackingField: 4
-  - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04352"
-    <ID>k__BackingField: 3
+  - <enemyName>k__BackingField: "\u0420\u044B\u0446\u0430\u0440\u044C"
+    <ID>k__BackingField: 2
     <health>k__BackingField: 20
-    <moveSpeed>k__BackingField: 5
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 4
+    <resistance>k__BackingField: 8
+    <moveSpeed>k__BackingField: 1
+    <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+    <minWave>k__BackingField: 3
     <maxWave>k__BackingField: 5
-  - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
-    <ID>k__BackingField: 3
-    <health>k__BackingField: 22
-    <moveSpeed>k__BackingField: 5
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 5
-    <maxWave>k__BackingField: 6
-  - <enemyName>k__BackingField: "\u0444\u044B\u0432\u0444\u044B\u0432\u0444\u044B\u0432"
-    <ID>k__BackingField: 3
-    <health>k__BackingField: 22
-    <moveSpeed>k__BackingField: 5
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 5
-    <maxWave>k__BackingField: 6
-  - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
-    <ID>k__BackingField: 3
-    <health>k__BackingField: 22
-    <moveSpeed>k__BackingField: 5
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 5
-    <maxWave>k__BackingField: 6
-  - <enemyName>k__BackingField: "\u0417\u0430\u0435\u0431\u0438\u0449\u04353"
-    <ID>k__BackingField: 3
-    <health>k__BackingField: 22
-    <moveSpeed>k__BackingField: 5
-    <prefab>k__BackingField: {fileID: 7500113194127661551, guid: b9a56894c68352c43932f13c068af54c, type: 3}
-    <reward>k__BackingField: 0
-    <minWave>k__BackingField: 5
-    <maxWave>k__BackingField: 6

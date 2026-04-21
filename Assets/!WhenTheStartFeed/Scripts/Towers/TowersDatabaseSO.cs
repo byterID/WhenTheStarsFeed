@@ -21,4 +21,7 @@ public class TowersData
     public GameObject Prefab {get; private set; }
     [field: SerializeField]
     public int Cost { get; private set; }
+    [field: SerializeField]
+
+    public bool IsAnnihilator { get; private set; } = false;
 }

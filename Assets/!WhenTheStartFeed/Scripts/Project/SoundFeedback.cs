@@ -7,7 +7,14 @@ public class SoundFeedback : MonoBehaviour
 
     [SerializeField]
     private AudioSource audioSource;
-
+    private void Awake()
+    {
+        ServiceLocator.Register<SoundFeedback>(this);
+    }
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister<SoundFeedback>();
+    }
     public void PlaySound(SoundType soundType)
     {
         switch (soundType)

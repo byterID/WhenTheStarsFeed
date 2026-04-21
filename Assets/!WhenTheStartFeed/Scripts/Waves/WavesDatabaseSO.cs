@@ -1,32 +1,46 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WavesDatabaseSO", menuName = "Scriptable Objects/WavesDatabaseSO")]
 public class WavesDatabaseSO : ScriptableObject
 {
-    [Header("�����")]
+    [Header("Волны")]
     public List<WaveData> waveDatabase;
 }
 
+// ── Данные одной волны ────────────────────────────────────────────────
 [Serializable]
 public class WaveData
 {
-    [Header("������ �����")]
-    [field: SerializeField] public int waveIndex { get; private set; } 
+    [Header("Индекс волны")]
+    [field: SerializeField] public int waveIndex;
 
-    [Header("������������ �����")]
-    [field: SerializeField] public float waveDuration { get; private set; }
+    [Header("Время подготовки до начала волны (сек)")]
+    [field: SerializeField] public float preparationTime = 5f;
 
-    [Header("����� ��� ����������")]
-    [field: SerializeField] public float preparationTime;
+    [Header("Время до следующей волны после начала этой (сек)")]
+    [field: SerializeField] public float timeToNextWave = 30f;
 
-    [Header("������� ������ ������")]
-    [field: SerializeField] public float spawnCooldown;
+    [Header("Отряды юнитов в волне (по порядку)")]
+    [SerializeField] public List<EnemySquad> squads = new();
+}
 
-    [Header("����� ��� �����")]
-    [field: SerializeField] public List<EnemiesData> enemies;
+// ── Отряд — группа юнитов одного типа с кучностью ────────────────────
+[Serializable]
+public class EnemySquad
+{
+    [Header("Тип врага")]
+    public EnemiesData enemyData;
 
-    [Header("���-�� ������ �� �����")]
-    [field: SerializeField] public int enemyCount;
+    [Header("Количество юнитов в отряде")]
+    public int count = 5;
+
+    [Header("Кучность (0=рассеянно, 1=плотно)")]
+    [Range(0f, 1f)]
+    public float density = 0.5f;
+
+    // Вычисляемое свойство: задержка между спавном юнитов
+    // density=0 → 1 сек, density=1 → 0.25 сек
+    public float SpawnInterval => Mathf.Lerp(1f, 0.25f, density);
 }

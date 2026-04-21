@@ -1,43 +1,71 @@
+﻿using System.Collections;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] private Transform _spawnPoint; //���� ����� ������
-    [SerializeField] private Transform[] _multipleSpawnPoints; //����� ����� ������
-    [SerializeField] private Transform[] _path;
-    private int _randomIndex;
+    [Header("Точки спавна")]
+    [SerializeField] private Transform _spawnPoint;
+    [SerializeField] private Transform[] _multipleSpawnPoints;
 
+    [Header("Маршрут")]
+    [SerializeField] private Transform[] _path;
+
+    // ── Тестовый спавн (оставляем для кнопки UI) ─────────────────────
+    [Header("Тест")]
     [SerializeField] private GameObject _enemyPrefab;
 
-    private void RandomizeEnemySpawnPoint()
+    public void SpawnEnemy()
     {
-        _randomIndex = Random.Range(0, _multipleSpawnPoints.Length);
+        SpawnSingle(_enemyPrefab, _spawnPoint.position, 1f, 0f);
     }
 
-    public void SpawnEnemySinglePoint(GameObject[] enemyPrefab, float cooldown)//����� � ����� �����
+    // ── Основной метод: спавн отряда с задержкой ─────────────────────
+
+    /// <summary>
+    /// Спавнит отряд юнитов по одному с интервалом из density.
+    /// scaleMult — множитель статов (для повторяющихся циклов волн).
+    /// </summary>
+    public IEnumerator SpawnSquad(EnemySquad squad, float scaleMult)
     {
-        for (int i = 0; i < enemyPrefab.Length; i++)
+        for (int i = 0; i < squad.count; i++)
         {
-            GameObject enemy = Instantiate(enemyPrefab[i], _spawnPoint);
-            enemy.transform.SetParent(DynamicRoot.Root);
+            Vector3 spawnPos = GetSpawnPosition();
+            SpawnSingle(squad.enemyData.prefab, spawnPos,
+                        squad.enemyData.health * scaleMult,
+                        squad.enemyData.resistance);
+
+            yield return new WaitForSeconds(squad.SpawnInterval);
         }
     }
 
-    public void SpawnEnemiesMultiplePoints(GameObject[] enemyPrefab, float cooldown)//����� � ������ ������
+    // ── Внутренний спавн одного врага ────────────────────────────────
+
+    private void SpawnSingle(GameObject prefab, Vector3 position,
+                              float health, float resistance)
     {
-        for (int i = 0; i < enemyPrefab.Length; i++)
-        {
-            RandomizeEnemySpawnPoint();
-            GameObject enemy = Instantiate(enemyPrefab[i], _multipleSpawnPoints[_randomIndex]);
-            enemy.transform.SetParent(DynamicRoot.Root);
-        }
+        GameObject enemy = Instantiate(prefab, position, Quaternion.identity);
+        enemy.transform.SetParent(DynamicRoot.Root);
+
+        // Назначаем маршрут
+        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
+        if (movement != null)
+            movement.SetPath(_path);
+
+        // Инициализируем статы
+        EnemyActions actions = enemy.GetComponent<EnemyActions>();
+        if (actions != null)
+            actions.InitFromData(health, resistance);
     }
 
-    public void SpawnEnemy()//������������� �����
+    // ── Позиция спавна ────────────────────────────────────────────────
+
+    private Vector3 GetSpawnPosition()
     {
-        GameObject enemy = Instantiate(_enemyPrefab, _spawnPoint);
-        enemy.GetComponent<EnemyMovement>().moveTargets = _path;
+        if (_multipleSpawnPoints != null && _multipleSpawnPoints.Length > 0)
+        {
+            int idx = Random.Range(0, _multipleSpawnPoints.Length);
+            return _multipleSpawnPoints[idx].position;
+        }
+        return _spawnPoint.position;
     }
 }
-
-

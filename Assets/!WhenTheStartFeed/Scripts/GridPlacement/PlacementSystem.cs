@@ -1,95 +1,242 @@
 using UnityEngine;
 
-public class PlacementSystem : MonoBehaviour //
+public class PlacementSystem : MonoBehaviour
 {
-    [SerializeField] private InputManager inputManager; // управляет получением позиции курсора, кликами, выходом из режима и т.д.
+    public static PlacementSystem Instance { get; private set; }
+
+    [SerializeField] private BuildingInputManager inputManager;
     [SerializeField] private Grid grid;
+    [SerializeField] private TowersDatabaseSO database;
+    [SerializeField] private GameObject gridVisualization;
 
-    [SerializeField] private TowersDatabaseSO database; // база всех объектов для установки
+    private GridData floorData, furnitureData;
 
-    [SerializeField] private GameObject gridVisualization; // визуализирует сетку для размещения
+    [SerializeField] private PreviewSystem preview;
+    [SerializeField] private ObjectPlacer objectPlacer;
+    [SerializeField] private SoundFeedback soundFeedback;
+    [SerializeField] private MoneyManager moneyManager;
+    [SerializeField] private Transform blockedAreasParent;
 
-    private GridData floorData, furnitureData; // данные о занятости клеток: отдельно для пола и мебели
+    [SerializeField] private PlacementConfirmUI confirmUI;
 
-    [SerializeField] private PreviewSystem preview;  // предпросмотр объекта/курсор
+    // Центр карты — сюда спавним голограмму
+    [SerializeField] private Transform mapCenter;
 
-    private Vector3Int lastDetectedPosition = Vector3Int.zero;  // последняя клетка, в которой был курсор
+    private IBuildingState buildingState;
+    private Vector3Int lastDetectedPosition = Vector3Int.zero;
+    private bool _isDragging = false;
 
-    [SerializeField] private ObjectPlacer objectPlacer;  // создаёт/удаляет реальные GameObject в мире
+    private int _currentTowerID = -1;
 
-    IBuildingState buildingState; // текущее состояние (режим): размещение или удаление
+    public bool IsPlacing => buildingState != null;
 
-    [SerializeField] private SoundFeedback soundFeedback; //звуки
-
-    [SerializeField] private MoneyManager moneyManager;//деньги
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
-        gridVisualization.SetActive(false); // Грид скрыт, пока игрок не начнёт размещение
+        gridVisualization.SetActive(false);
         floorData = new();
         furnitureData = new();
+        RegisterBlockedAreas();
     }
 
-    public void StartPlacement(int ID)  //запуск режима размещения
-    {
-        StopPlacement();                                        // Останавливаем предыдущий режим (если был)
-        gridVisualization.SetActive(true);                      // Показываем сетку на полу
-        buildingState = new PlacementState(ID,                   // Создаём новое состояние PlacementState
-                                           grid,
-                                           preview,
-                                           database,
-                                           floorData,
-                                           furnitureData,
-                                           objectPlacer,
-                                           soundFeedback,
-                                           moneyManager);
-        inputManager.OnClicked += PlaceStructure;               // подписываемся на событие установки объекта
-        inputManager.OnExit += StopPlacement;                   // подписываемся на кнопку выхода
-    }
+    // ── Перемещение ────────────────────────────────────────────────────
 
-    public void StartRemoving()//Удаление структуры(включение режима удаления)
+    public void StartMoving(TowerClickHandler tower)
     {
-        StopPlacement();                                        // Чистим предыдущий режим
+        Debug.Log($"StartMoving: towerID={tower.towerID}, gridCell={tower.gridCell}, name={tower.gameObject.name}");
+        TowerClickHandler.DeselectAll();
+        _currentTowerID = tower.towerID;
+        StopPlacement();
         gridVisualization.SetActive(true);
-        buildingState = new RemovingState(grid, preview, floorData, furnitureData, objectPlacer, soundFeedback); // устанавливаем новое состояние — RemovingState
-        inputManager.OnClicked += PlaceStructure;               // Подписываем те же события установки/выхода (здесь установка считается удалением)
+
+        int objectIndex = furnitureData.GetRepresentationIndex(tower.gridCell);
+        if (objectIndex == -1)
+            objectIndex = floorData.GetRepresentationIndex(tower.gridCell);
+
+        buildingState = new TowerMoveState(
+            tower,
+            objectIndex,
+            grid,
+            preview,
+            database,
+            floorData,
+            furnitureData,
+            objectPlacer,
+            soundFeedback);
+
+        Vector3Int startCell = tower.gridCell;
+        buildingState.UpdateState(startCell);
+        lastDetectedPosition = startCell;
+
+        inputManager.Activate(grid.CellToWorld(startCell));
+
+        inputManager.OnDragMove += OnDragMove;
+        inputManager.OnDragReleased += OnDragReleased;
         inputManager.OnExit += StopPlacement;
     }
 
-    private void PlaceStructure()
+    // ── Placement ──────────────────────────────────────────────────────
+
+    public void StartPlacement(int ID)
     {
-        if (inputManager.IsPointerOverUI())
-            return;
+        _currentTowerID = ID;
+        StopPlacement();
+        gridVisualization.SetActive(true);
 
-        Vector3 mousePosition = inputManager.GetSelectedMapPosition();
-        Vector3Int gridPosition = grid.WorldToCell(mousePosition);
+        buildingState = new PlacementState(
+            ID, grid, preview, database,
+            floorData, furnitureData,
+            objectPlacer, soundFeedback, moneyManager);
 
-        buildingState.OnAction(gridPosition);
+        Vector3 centerPos = mapCenter != null
+            ? mapCenter.position
+            : Vector3.zero;
+
+        Vector3Int centerCell = grid.WorldToCell(centerPos);
+        buildingState.UpdateState(centerCell);
+        lastDetectedPosition = centerCell;
+
+        inputManager.Activate(grid.CellToWorld(centerCell));
+
+        inputManager.OnDragMove += OnDragMove;
+        inputManager.OnDragReleased += OnDragReleased;
+        inputManager.OnExit += StopPlacement;
     }
-    private void StopPlacement()//Завершение режима(на ESC)
+
+    public void StartRemoving()
     {
-        soundFeedback.PlaySound(SoundType.Click);
-        if (buildingState == null)
-            return;
-        gridVisualization.SetActive(false);
-        buildingState.EndState();                   // Сообщаем state, что он завершает работу
-        inputManager.OnClicked -= PlaceStructure;   // Отписываемся от событий
-        inputManager.OnExit -= StopPlacement;
-        lastDetectedPosition = Vector3Int.zero;     // Сбрасываем последнюю позицию
-        buildingState = null;                       // Очищаем состояние
+        StopPlacement();
+        gridVisualization.SetActive(true);
+        buildingState = new RemovingState(
+            grid, preview, floorData, furnitureData,
+            objectPlacer, soundFeedback);
+
+        inputManager.Activate(Vector3.zero);
+        inputManager.OnDragMove += OnDragMove;
+        inputManager.OnDragReleased += OnDragReleased;
+        inputManager.OnExit += StopPlacement;
     }
 
-    private void Update()//обновление предпросмотра на каждый кадр
+    // ── Drag callbacks ─────────────────────────────────────────────────
+
+    private void OnDragMove(Vector3 worldPos)
     {
-        if (buildingState == null) // Если сейчас нет режима — ничего не делаем
-            return;
-        Vector3 mousePosition = inputManager.GetSelectedMapPosition();  // Получаем мировую позицию курсора
-        Vector3Int gridPosition = grid.WorldToCell(mousePosition);      // Переводим в клетку сетки
-        if(lastDetectedPosition != gridPosition)                        // Обновляем только если клетка изменилась
+        if (buildingState == null) return;
+
+        _isDragging = true;
+        confirmUI.Hide();
+
+        Vector3Int gridPos = grid.WorldToCell(worldPos);
+        if (gridPos != lastDetectedPosition)
         {
-            buildingState.UpdateState(gridPosition);
-            lastDetectedPosition = gridPosition;
+            buildingState.UpdateState(gridPos);
+            lastDetectedPosition = gridPos;
         }
-        
+    }
+
+    private void OnDragReleased()
+    {
+        if (buildingState == null) return;
+        _isDragging = false;
+
+        Transform ghostTransform = preview.GetPreviewTransform();
+
+        bool isAnnihilator = false;
+        if (buildingState is PlacementState || buildingState is TowerMoveState)
+        {
+            int idx = database.objectsData.FindIndex(d => d.ID == _currentTowerID);
+            if (idx >= 0)
+                isAnnihilator = database.objectsData[idx].IsAnnihilator;
+        }
+
+        confirmUI.Show(ghostTransform,
+            onConfirm: ConfirmPlacement,
+            onCancel: StopPlacement,
+            isAnnihilator: isAnnihilator,
+            onRotate: OnRotateGhost);
+    }
+
+    // ── Поворот голограммы (вызывается кнопкой Rotate в UI) ───────────
+
+    private void OnRotateGhost()
+    {
+        Transform ghost = preview.GetPreviewTransform();
+        if (ghost == null) return;
+
+        // Поворачиваем на 90° по оси Y
+        ghost.Rotate(0f, 90f, 0f, Space.World);
+    }
+
+    // ── Confirm / Cancel ───────────────────────────────────────────────
+
+    private void ConfirmPlacement()
+    {
+        if (buildingState == null) return;
+
+        // ── Читаем поворот голограммы и передаём в state ──────────────
+        // Это ключевой момент: поворот голограммы → реальный поворот башни.
+        Transform ghost = preview.GetPreviewTransform();
+        Quaternion ghostRotation = ghost != null ? ghost.rotation : Quaternion.identity;
+
+        if (buildingState is PlacementState ps)
+            ps.SetPlacementRotation(ghostRotation);
+        else if (buildingState is TowerMoveState tms)
+            tms.SetPlacementRotation(ghostRotation);
+
+        Vector3Int gridPos = grid.WorldToCell(inputManager.GetSelectedMapPosition());
+        buildingState.OnAction(gridPos);
+        StopPlacement();
+    }
+
+    private void StopPlacement()
+    {
+        TowerClickHandler.DeselectAll();
+        soundFeedback.PlaySound(SoundType.Click);
+        if (buildingState == null) return;
+
+        gridVisualization.SetActive(false);
+        buildingState.EndState();
+
+        inputManager.OnDragMove -= OnDragMove;
+        inputManager.OnDragReleased -= OnDragReleased;
+        inputManager.OnExit -= StopPlacement;
+        inputManager.Deactivate();
+
+        confirmUI.Hide();
+
+        lastDetectedPosition = Vector3Int.zero;
+        _isDragging = false;
+        buildingState = null;
+    }
+
+    private void Update()
+    {
+        // Движение голограммы только через OnDragMove
+    }
+
+    // ── RegisterBlockedAreas ───────────────────────────────────────────
+
+    private void RegisterBlockedAreas()
+    {
+        foreach (Transform child in blockedAreasParent)
+        {
+            BlockedAreaMarker marker = child.GetComponent<BlockedAreaMarker>();
+            if (marker == null) continue;
+
+            Vector3 bottomLeft = child.position
+                - new Vector3(marker.size.x / 2f, 0, marker.size.y / 2f);
+            Vector3Int startCell = grid.WorldToCell(bottomLeft);
+
+            for (int x = 0; x < marker.size.x; x++)
+                for (int z = 0; z < marker.size.y; z++)
+                {
+                    Vector3Int cell = startCell + new Vector3Int(x, 0, z);
+                    floorData.AddObjectAt(cell, Vector2Int.one, -1, -1);
+                }
+        }
     }
 }

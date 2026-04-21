@@ -167,4 +167,8 @@ public class PreviewSystem : MonoBehaviour
         PrepareCursor(Vector2Int.one);
         ApplyFeedbackToCursor(false);
     }
+    public Transform GetPreviewTransform()
+    {
+        return previewObject != null ? previewObject.transform : null;
+    }
 }

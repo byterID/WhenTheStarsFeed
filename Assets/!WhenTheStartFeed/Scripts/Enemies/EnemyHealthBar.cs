@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.UI;
 
 public class EnemyHealthBar : MonoBehaviour
@@ -12,7 +12,7 @@ public class EnemyHealthBar : MonoBehaviour
     private Camera mainCamera;
     private float lastDamageTime;
     private CanvasGroup canvasGroup;
-    private int maxHealth; // Сохраняем максимальное здоровье
+    private float maxHealth; // РЎРѕС…СЂР°РЅСЏРµРј РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ Р·РґРѕСЂРѕРІСЊРµ
 
     private void Awake()
     {
@@ -25,13 +25,13 @@ public class EnemyHealthBar : MonoBehaviour
         if (!alwaysVisible)
             canvasGroup.alpha = 0f;
 
-        // ИНИЦИАЛИЗИРУЕМ СЛАЙДЕР
+        // РРќРР¦РРђР›РР—РР РЈР•Рњ РЎР›РђР™Р”Р•Р 
         if (slider != null)
         {
             slider.minValue = 0;
-            slider.maxValue = 1; // Всегда держим maxValue = 1 для процентного отображения
-            slider.value = 1; // Начинаем с полного здоровья
-            slider.wholeNumbers = false; // Разрешаем дробные значения
+            slider.maxValue = 1; // Р’СЃРµРіРґР° РґРµСЂР¶РёРј maxValue = 1 РґР»СЏ РїСЂРѕС†РµРЅС‚РЅРѕРіРѕ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ
+            slider.value = 1; // РќР°С‡РёРЅР°РµРј СЃ РїРѕР»РЅРѕРіРѕ Р·РґРѕСЂРѕРІСЊСЏ
+            slider.wholeNumbers = false; // Р Р°Р·СЂРµС€Р°РµРј РґСЂРѕР±РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
         }
     }
 
@@ -49,15 +49,14 @@ public class EnemyHealthBar : MonoBehaviour
         }
     }
 
-    public void UpdateHealthBar(int currentHealth, int maxHealth)
+    public void UpdateHealthBar(float currentHealth, float maxHealth)
     {
-        this.maxHealth = maxHealth; // Сохраняем для возможного использования
+        this.maxHealth = (int)maxHealth;
 
         if (slider != null)
         {
-            // Вычисляем процент здоровья и устанавливаем значение слайдера
-            float healthPercent = (float)currentHealth / maxHealth;
-            slider.value = healthPercent;
+            float healthPercent = currentHealth / maxHealth;
+            slider.value = Mathf.Clamp01(healthPercent); 
         }
 
         if (!alwaysVisible)
@@ -67,14 +66,12 @@ public class EnemyHealthBar : MonoBehaviour
         }
     }
 
-    public void SetMaxHealth(int maxHealth)
+    public void SetMaxHealth(float maxHealth)
     {
         if (slider != null)
         {
-            // Не меняем maxValue слайдера, так как он всегда должен быть 1
-            // Просто устанавливаем текущее значение на 1 (100%)
-            slider.value = 1;
-            this.maxHealth = maxHealth;
+            slider.value = 1f;
+            this.maxHealth = (int)maxHealth;
         }
     }
 }

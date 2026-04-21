@@ -249,7 +249,7 @@ Transform:
   m_GameObject: {fileID: 5082994244688903197}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.48559, y: 0.5, z: 0.24991}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -270,9 +270,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   _bulletPrefab: {fileID: 1253497764981070148, guid: bc1bc2941c54d1045bcd96687041b5f2, type: 3}
-  _reloadTime: 2
+  _reloadTime: 1.5
   _bulletSpawnTransform: {fileID: 2939808305613501029}
-  _Dynamic: {fileID: 0}
+  _damage: 5
+  _armorPenetration: 0
+  _rotatingPart: {fileID: 2939808305613501029}
+  _rotationSpeed: 180
+  _aimThreshold: 10
 --- !u!135 &7067339880883331324
 SphereCollider:
   m_ObjectHideFlags: 0
