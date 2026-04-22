@@ -15,10 +15,11 @@ public class TowerMoveState : IBuildingState
     private readonly TowerClickHandler _sourceTower;
     private readonly Vector3Int _originalCell;
     private readonly int _originalObjectIndex;
+    private readonly Vector2Int _originalSize; // запомним оригинальный размер для возврата
 
     private bool _confirmed = false;
 
-    // ── Поворот голограммы — устанавливается из PlacementSystem ──────
+    // Поворот — устанавливается из PlacementSystem перед OnAction
     private Quaternion _placementRotation = Quaternion.identity;
 
     public void SetPlacementRotation(Quaternion rotation)
@@ -53,24 +54,17 @@ public class TowerMoveState : IBuildingState
         if (selectedObjectIndex < 0)
             throw new System.Exception($"TowerMoveState: no tower with ID {_towerID}");
 
-        // Запоминаем текущий поворот башни как стартовый поворот голограммы
-        _placementRotation = sourceTower.transform.rotation;
+        _originalSize = database.objectsData[selectedObjectIndex].Size;
 
-        // ── Освобождаем клетки ДО показа голограммы ───────────────────
         _towersData.RemoveObjectAtSafe(_originalCell);
-
-        // Скрываем оригинальную башню
         _sourceTower.gameObject.SetActive(false);
 
-        // Показываем голограмму с тем же поворотом что была у башни
         _preview.StartShowingPlacementPreview(
             database.objectsData[selectedObjectIndex].Prefab,
-            database.objectsData[selectedObjectIndex].Size);
+            _originalSize);
 
-        // Применяем начальный поворот к голограмме
-        Transform ghost = _preview.GetPreviewTransform();
-        if (ghost != null)
-            ghost.rotation = _placementRotation;
+        // Голограмма открывается с текущим поворотом башни
+        _preview.SetPreviewRotation(sourceTower.transform.rotation);
     }
 
     public void EndState()
@@ -80,9 +74,10 @@ public class TowerMoveState : IBuildingState
         if (!_confirmed && _sourceTower != null)
         {
             _sourceTower.gameObject.SetActive(true);
+            // Возвращаем с оригинальным размером (до любых поворотов в этой сессии)
             _towersData.AddObjectAtSafe(
                 _originalCell,
-                _database.objectsData[selectedObjectIndex].Size,
+                _originalSize,
                 _towerID,
                 _originalObjectIndex);
         }
@@ -90,7 +85,9 @@ public class TowerMoveState : IBuildingState
 
     public void OnAction(Vector3Int gridPosition)
     {
-        bool valid = CheckValidity(gridPosition);
+        Vector2Int currentSize = _preview.GetCurrentSize();
+
+        bool valid = CheckValidity(gridPosition, currentSize);
         if (!valid)
         {
             _soundFeedback.PlaySound(SoundType.wrongPlacement);
@@ -99,17 +96,15 @@ public class TowerMoveState : IBuildingState
 
         _confirmed = true;
 
-        Vector3 newWorldPos = _grid.CellToWorld(gridPosition);
-
-        // Применяем новую позицию И поворот из голограммы
-        _sourceTower.transform.position = newWorldPos;
+        _sourceTower.transform.position = _grid.CellToWorld(gridPosition);
         _sourceTower.transform.rotation = _placementRotation;
         _sourceTower.gridCell = gridPosition;
         _sourceTower.gameObject.SetActive(true);
 
+        // Записываем повёрнутый размер
         _towersData.AddObjectAtSafe(
             gridPosition,
-            _database.objectsData[selectedObjectIndex].Size,
+            currentSize,
             _towerID,
             _originalObjectIndex);
 
@@ -118,13 +113,13 @@ public class TowerMoveState : IBuildingState
 
     public void UpdateState(Vector3Int gridPosition)
     {
-        bool valid = CheckValidity(gridPosition);
+        Vector2Int currentSize = _preview.GetCurrentSize();
+        bool valid = CheckValidity(gridPosition, currentSize);
         _preview.UpdatePosition(_grid.CellToWorld(gridPosition), valid);
     }
 
-    private bool CheckValidity(Vector3Int gridPosition)
+    private bool CheckValidity(Vector3Int gridPosition, Vector2Int size)
     {
-        Vector2Int size = _database.objectsData[selectedObjectIndex].Size;
         return _towersData.CanPlaceObejctAt(gridPosition, size)
             && _floorData.CanPlaceObejctAt(gridPosition, size);
     }

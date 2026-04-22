@@ -13,9 +13,7 @@ public class PlacementState : IBuildingState
     SoundFeedback soundFeedback;
     MoneyManager moneyManager;
 
-    // ── Поворот голограммы — устанавливается из PlacementSystem ──────
-    // PlacementSystem вызывает SetPlacementRotation() перед OnAction,
-    // чтобы передать поворот который игрок выставил кнопкой Rotate.
+    // Поворот — устанавливается из PlacementSystem перед OnAction
     private Quaternion _placementRotation = Quaternion.identity;
 
     public void SetPlacementRotation(Quaternion rotation)
@@ -61,7 +59,10 @@ public class PlacementState : IBuildingState
 
     public void OnAction(Vector3Int gridPosition)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        // Берём актуальный размер с учётом поворота
+        Vector2Int currentSize = previewSystem.GetCurrentSize();
+
+        bool placementValidity = CheckPlacementValidity(gridPosition, currentSize);
         if (!placementValidity)
         {
             soundFeedback.PlaySound(SoundType.wrongPlacement);
@@ -81,12 +82,12 @@ public class PlacementState : IBuildingState
             grid.CellToWorld(gridPosition),
             database.objectsData[selectedObjectIndex].ID,
             gridPosition,
-            _placementRotation);   // ← передаём поворот голограммы
+            _placementRotation);
 
-        GridData selectedData = towersData;
-        selectedData.AddObjectAt(
+        // Записываем повёрнутый размер — именно он определяет занятые клетки
+        towersData.AddObjectAt(
             gridPosition,
-            database.objectsData[selectedObjectIndex].Size,
+            currentSize,
             database.objectsData[selectedObjectIndex].ID,
             index);
 
@@ -96,22 +97,20 @@ public class PlacementState : IBuildingState
         Debug.Log("Башня куплена! Осталось денег: " + moneyManager.CurrentMoney);
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
+    private bool CheckPlacementValidity(Vector3Int gridPosition, Vector2Int size)
     {
-        Vector2Int size = database.objectsData[selectedObjectIndex].Size;
-
         if (!towersData.CanPlaceObejctAt(gridPosition, size))
             return false;
-
         if (!floorData.CanPlaceObejctAt(gridPosition, size))
             return false;
-
         return true;
     }
 
     public void UpdateState(Vector3Int gridPosition)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
+        // Берём актуальный размер с учётом поворота для проверки валидности
+        Vector2Int currentSize = previewSystem.GetCurrentSize();
+        bool placementValidity = CheckPlacementValidity(gridPosition, currentSize);
         previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), placementValidity);
     }
 }

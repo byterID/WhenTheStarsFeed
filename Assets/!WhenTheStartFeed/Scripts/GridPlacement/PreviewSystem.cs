@@ -12,10 +12,19 @@ public class PreviewSystem : MonoBehaviour
     private Renderer cellIndicatorRenderer;
     [SerializeField] private Transform _Dynamic;
 
-    // Добавляем переменную для хранения оригинального слоя
-    private int originalLayer;
-    // Константа с именем слоя (чтобы не ошибиться в написании)
+    // ── Ссылка на Grid для точного расчёта смещения курсора ──────────
+    // Grid.CellToWorld() возвращает УГОЛ клетки (левый нижний corner).
+    // Курсор (cellIndicator) масштабируется от своего центра, поэтому
+    // его нужно сдвинуть на половину занимаемого прямоугольника.
+    // Формула: offset = (size - 1) * cellSize * 0.5
+    [SerializeField] private Grid _grid;
+
     private const string PREVIEW_LAYER_NAME = "Preview";
+
+    // ── Поворот и размер ──────────────────────────────────────────────
+    private Quaternion _currentRotation = Quaternion.identity;
+    private Vector2Int _baseSize = Vector2Int.one;
+    private Vector2Int _currentRotatedSize = Vector2Int.one;
 
     private void Start()
     {
@@ -26,102 +35,51 @@ public class PreviewSystem : MonoBehaviour
 
     public void StartShowingPlacementPreview(GameObject prefab, Vector2Int size)
     {
-        // Создаём копию объекта
         previewObject = Instantiate(prefab);
 
-        // СОХРАНЯЕМ ОРИГИНАЛЬНЫЙ СЛОЙ (на всякий случай)
-        originalLayer = previewObject.layer;
-
-        // УСТАНАВЛИВАЕМ СЛОЙ PREVIEW
         SetLayerRecursively(previewObject, LayerMask.NameToLayer(PREVIEW_LAYER_NAME));
-
-        // ОТКЛЮЧАЕМ ВСЕ КОМПОНЕНТЫ С ЛОГИКОЙ (как дополнительная мера)
         DisableAllTowerComponents(previewObject);
-
         PreparePreview(previewObject);
+        previewObject.transform.SetParent(_Dynamic);
+
+        _currentRotation = Quaternion.identity;
+        _baseSize = size;
+        _currentRotatedSize = size;
+
+        previewObject.transform.rotation = _currentRotation;
+
         PrepareCursor(size);
         cellIndicator.SetActive(true);
-        previewObject.transform.SetParent(_Dynamic);
     }
 
-    // Рекурсивно устанавливает слой для объекта и всех его детей
-    private void SetLayerRecursively(GameObject obj, int newLayer)
+    // ── Поворот ───────────────────────────────────────────────────────
+
+    public void RotatePreview()
     {
-        if (obj == null) return;
+        if (previewObject == null) return;
 
-        // Устанавливаем слой для текущего объекта
-        obj.layer = newLayer;
+        _currentRotation *= Quaternion.Euler(0f, 90f, 0f);
+        previewObject.transform.rotation = _currentRotation;
 
-        // Устанавливаем для всех дочерних объектов
-        foreach (Transform child in obj.transform)
-        {
-            SetLayerRecursively(child.gameObject, newLayer);
-        }
+        _currentRotatedSize = GetRotatedSize(_currentRotation);
+        UpdateCursorSize(_currentRotatedSize);
     }
 
-    // Отключаем все компоненты башни, чтобы они точно не работали
-    private void DisableAllTowerComponents(GameObject obj)
+    public void SetPreviewRotation(Quaternion rotation)
     {
-        // Отключаем скрипт башни
-        Tower tower = obj.GetComponent<Tower>();
-        if (tower != null)
-            tower.enabled = false;
+        if (previewObject == null) return;
 
-        // Отключаем все остальные скрипты (опционально)
-        MonoBehaviour[] scripts = obj.GetComponentsInChildren<MonoBehaviour>();
-        foreach (var script in scripts)
-        {
-            // Не отключаем этот скрипт, если он есть на объекте (маловероятно)
-            if (script != this)
-                script.enabled = false;
-        }
+        _currentRotation = rotation;
+        previewObject.transform.rotation = _currentRotation;
 
-        // Отключаем коллайдеры (хотя слои уже должны работать)
-        Collider[] colliders = obj.GetComponentsInChildren<Collider>();
-        foreach (var collider in colliders)
-        {
-            collider.enabled = false;
-        }
-
-        // Отключаем Rigidbody если есть
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
-        if (rb != null)
-            rb.isKinematic = true;
+        _currentRotatedSize = GetRotatedSize(_currentRotation);
+        UpdateCursorSize(_currentRotatedSize);
     }
 
-    // ОСТАЛЬНЫЕ МЕТОДЫ БЕЗ ИЗМЕНЕНИЙ
-    private void PrepareCursor(Vector2Int size)
-    {
-        if (size.x > 0 || size.y > 0)
-        {
-            cellIndicator.transform.localScale = new Vector3(size.x, 1, size.y);
-            cellIndicatorRenderer.material.mainTextureScale = size;
-        }
-    }
+    public Quaternion GetPreviewRotation() => _currentRotation;
+    public Vector2Int GetCurrentSize() => _currentRotatedSize;
 
-    private void PreparePreview(GameObject previewObject)
-    {
-        Renderer[] renderers = previewObject.GetComponentsInChildren<Renderer>();
-        foreach (Renderer renderer in renderers)
-        {
-            Material[] materials = renderer.materials;
-            for (int i = 0; i < materials.Length; i++)
-            {
-                materials[i] = previewMaterialInstance;
-            }
-            renderer.materials = materials;
-        }
-    }
-
-    public void StopShowingPreview()
-    {
-        cellIndicator.SetActive(false);
-        if (previewObject != null)
-        {
-            // Можно вернуть оригинальный слой, но мы всё равно удаляем объект
-            Destroy(previewObject);
-        }
-    }
+    // ── Позиция ───────────────────────────────────────────────────────
 
     public void UpdatePosition(Vector3 position, bool validity)
     {
@@ -132,6 +90,66 @@ public class PreviewSystem : MonoBehaviour
         }
         MoveCursor(position);
         ApplyFeedbackToCursor(validity);
+    }
+
+    // ── Остановка ─────────────────────────────────────────────────────
+
+    public void StopShowingPreview()
+    {
+        cellIndicator.SetActive(false);
+        if (previewObject != null)
+            Destroy(previewObject);
+
+        _currentRotation = Quaternion.identity;
+        _currentRotatedSize = Vector2Int.one;
+    }
+
+    public void StartShowingRemovePreview()
+    {
+        cellIndicator.SetActive(true);
+        PrepareCursor(Vector2Int.one);
+        ApplyFeedbackToCursor(false);
+    }
+
+    public Transform GetPreviewTransform()
+    {
+        return previewObject != null ? previewObject.transform : null;
+    }
+
+    // ── Приватные методы ──────────────────────────────────────────────
+
+    private Vector2Int GetRotatedSize(Quaternion rotation)
+    {
+        float yAngle = rotation.eulerAngles.y;
+        int steps = Mathf.RoundToInt(yAngle / 90f) % 4;
+        if (steps < 0) steps += 4;
+        bool swapAxes = (steps % 2) != 0;
+        return swapAxes
+            ? new Vector2Int(_baseSize.y, _baseSize.x)
+            : new Vector2Int(_baseSize.x, _baseSize.y);
+    }
+
+    private void PrepareCursor(Vector2Int size)
+    {
+        UpdateCursorSize(size);
+    }
+
+    private void UpdateCursorSize(Vector2Int size)
+    {
+        cellIndicator.transform.localScale = new Vector3(size.x, 1, size.y);
+        cellIndicatorRenderer.material.mainTextureScale = size;
+    }
+
+    private void PreparePreview(GameObject obj)
+    {
+        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers)
+        {
+            Material[] materials = renderer.materials;
+            for (int i = 0; i < materials.Length; i++)
+                materials[i] = previewMaterialInstance;
+            renderer.materials = materials;
+        }
     }
 
     private void ApplyFeedbackToPreview(bool validity)
@@ -150,25 +168,66 @@ public class PreviewSystem : MonoBehaviour
 
     private void MoveCursor(Vector3 position)
     {
-        cellIndicator.transform.position = position;
+        // CellToWorld() даёт угол клетки.
+        // cellIndicator масштабируется от своего центра → нужно сдвинуть
+        // на (size-1)*cellSize/2 чтобы угол курсора совпал с углом клетки.
+        //
+        // Пример: башня 2×3, cellSize=1
+        //   без поворота:  offset = ((2-1)/2, 0, (3-1)/2) = (0.5, 0, 1.0)
+        //   после 90°:     size становится 3×2
+        //                  offset = ((3-1)/2, 0, (2-1)/2) = (1.0, 0, 0.5)
+        Vector3 cellSize = _grid != null ? _grid.cellSize : Vector3.one;
+
+        Vector3 offset = new Vector3(
+            (_currentRotatedSize.x - 1) * cellSize.x * 0.5f,
+            0f,
+            (_currentRotatedSize.y - 1) * cellSize.z * 0.5f);
+
+        cellIndicator.transform.position = position + offset;
     }
 
     private void MovePreview(Vector3 position)
     {
-        previewObject.transform.position = new Vector3(
-            position.x,
-            position.y + previewYOffset,
-            position.z);
+        // Модель ставится в ту же точку что и курсор —
+        // с тем же смещением к центру занимаемого прямоугольника.
+        // Pivot префаба должен быть в геометрическом центре модели.
+        Vector3 cellSize = _grid != null ? _grid.cellSize : Vector3.one;
+
+        Vector3 offset = new Vector3(
+            (_currentRotatedSize.x - 1) * cellSize.x * 0.5f,
+            previewYOffset,
+            (_currentRotatedSize.y - 1) * cellSize.z * 0.5f);
+
+        previewObject.transform.position = position + offset;
     }
 
-    internal void StartShowingRemovePreview()
+    private void SetLayerRecursively(GameObject obj, int newLayer)
     {
-        cellIndicator.SetActive(true);
-        PrepareCursor(Vector2Int.one);
-        ApplyFeedbackToCursor(false);
+        if (obj == null) return;
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+            SetLayerRecursively(child.gameObject, newLayer);
     }
-    public Transform GetPreviewTransform()
+
+    private void DisableAllTowerComponents(GameObject obj)
     {
-        return previewObject != null ? previewObject.transform : null;
+        Tower tower = obj.GetComponent<Tower>();
+        if (tower != null)
+            tower.enabled = false;
+
+        MonoBehaviour[] scripts = obj.GetComponentsInChildren<MonoBehaviour>();
+        foreach (var script in scripts)
+        {
+            if (script != this)
+                script.enabled = false;
+        }
+
+        Collider[] colliders = obj.GetComponentsInChildren<Collider>();
+        foreach (var collider in colliders)
+            collider.enabled = false;
+
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        if (rb != null)
+            rb.isKinematic = true;
     }
 }

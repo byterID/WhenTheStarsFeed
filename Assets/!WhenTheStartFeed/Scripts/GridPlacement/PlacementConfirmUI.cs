@@ -11,50 +11,54 @@ public class PlacementConfirmUI : MonoBehaviour
     [SerializeField] private Button cancelButton;
 
     [Header("World Space Settings")]
-    [SerializeField] private Vector3 worldOffset = new Vector3(0f, 2.5f, 0f); // высота над башней
-    [SerializeField] private Camera uiCamera; // Main Camera
+    [SerializeField] private Vector3 worldOffset = new Vector3(0f, 2.5f, 0f);
+    [SerializeField] private Camera uiCamera;
 
-    [Header("Rotation (Annihilator only)")]
-    [SerializeField] private Button rotateButton;  // кнопка поворота
-    [SerializeField] private GameObject rotateButtonGO; // её GameObject
+    [Header("Rotation")]
+    [SerializeField] private Button rotateButton; // кнопка поворота — скрывается если canRotate=false
 
     private Action _onConfirm;
     private Action _onCancel;
-    private Transform _targetGhost; // трансформ голограммы
+    private Transform _targetGhost;
 
     private void Awake()
     {
         confirmButton.onClick.AddListener(OnConfirmClicked);
         cancelButton.onClick.AddListener(OnCancelClicked);
         panel.gameObject.SetActive(false);
+
+        // Кнопка поворота скрыта по умолчанию
+        if (rotateButton != null)
+            rotateButton.gameObject.SetActive(false);
     }
 
     private void LateUpdate()
     {
-        // Каждый кадр прикрепляем панель к голограмме
         if (panel.gameObject.activeSelf && _targetGhost != null)
-        {
             FollowGhost();
-        }
     }
 
-    // ── Публичные методы ──────────────────────────────────────────────
+    // ── Публичный метод ───────────────────────────────────────────────
+    // canRotate = true показывает кнопку поворота.
+    // Можно передавать true для любой башни, не только аннигилятора.
 
     public void Show(Transform ghostTransform, Action onConfirm, Action onCancel,
-                     bool isAnnihilator = false, Action onRotate = null)
+                     bool canRotate = false, Action onRotate = null)
     {
         _onConfirm = onConfirm;
         _onCancel = onCancel;
         _targetGhost = ghostTransform;
 
-        // Показываем кнопку поворота только аннигилятору
-        if (rotateButtonGO != null)
-            rotateButtonGO.SetActive(isAnnihilator);
-
-        if (isAnnihilator && onRotate != null)
+        // Показываем/скрываем кнопку поворота
+        if (rotateButton != null)
         {
-            rotateButton.onClick.RemoveAllListeners();
-            rotateButton.onClick.AddListener(() => onRotate?.Invoke());
+            rotateButton.gameObject.SetActive(canRotate);
+
+            if (canRotate && onRotate != null)
+            {
+                rotateButton.onClick.RemoveAllListeners();
+                rotateButton.onClick.AddListener(() => onRotate.Invoke());
+            }
         }
 
         panel.gameObject.SetActive(true);
@@ -77,11 +81,9 @@ public class PlacementConfirmUI : MonoBehaviour
     {
         if (_targetGhost == null || uiCamera == null) return;
 
-        // Мировая позиция над башней → экранная позиция
         Vector3 worldPos = _targetGhost.position + worldOffset;
         Vector3 screenPos = uiCamera.WorldToScreenPoint(worldPos);
 
-        // Если башня за камерой — прячем
         if (screenPos.z < 0f)
         {
             panel.gameObject.SetActive(false);

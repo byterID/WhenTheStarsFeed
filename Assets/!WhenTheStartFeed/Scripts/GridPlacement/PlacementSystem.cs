@@ -16,10 +16,7 @@ public class PlacementSystem : MonoBehaviour
     [SerializeField] private SoundFeedback soundFeedback;
     [SerializeField] private MoneyManager moneyManager;
     [SerializeField] private Transform blockedAreasParent;
-
     [SerializeField] private PlacementConfirmUI confirmUI;
-
-    // Центр карты — сюда спавним голограмму
     [SerializeField] private Transform mapCenter;
 
     private IBuildingState buildingState;
@@ -47,7 +44,7 @@ public class PlacementSystem : MonoBehaviour
 
     public void StartMoving(TowerClickHandler tower)
     {
-        Debug.Log($"StartMoving: towerID={tower.towerID}, gridCell={tower.gridCell}, name={tower.gameObject.name}");
+        Debug.Log($"StartMoving: towerID={tower.towerID}, gridCell={tower.gridCell}");
         TowerClickHandler.DeselectAll();
         _currentTowerID = tower.towerID;
         StopPlacement();
@@ -57,23 +54,16 @@ public class PlacementSystem : MonoBehaviour
         if (objectIndex == -1)
             objectIndex = floorData.GetRepresentationIndex(tower.gridCell);
 
+        // Передаём preview — TowerMoveState сам установит начальный поворот
         buildingState = new TowerMoveState(
-            tower,
-            objectIndex,
-            grid,
-            preview,
-            database,
-            floorData,
-            furnitureData,
-            objectPlacer,
-            soundFeedback);
+            tower, objectIndex, grid, preview, database,
+            floorData, furnitureData, objectPlacer, soundFeedback);
 
         Vector3Int startCell = tower.gridCell;
         buildingState.UpdateState(startCell);
         lastDetectedPosition = startCell;
 
         inputManager.Activate(grid.CellToWorld(startCell));
-
         inputManager.OnDragMove += OnDragMove;
         inputManager.OnDragReleased += OnDragReleased;
         inputManager.OnExit += StopPlacement;
@@ -92,16 +82,12 @@ public class PlacementSystem : MonoBehaviour
             floorData, furnitureData,
             objectPlacer, soundFeedback, moneyManager);
 
-        Vector3 centerPos = mapCenter != null
-            ? mapCenter.position
-            : Vector3.zero;
-
+        Vector3 centerPos = mapCenter != null ? mapCenter.position : Vector3.zero;
         Vector3Int centerCell = grid.WorldToCell(centerPos);
         buildingState.UpdateState(centerCell);
         lastDetectedPosition = centerCell;
 
         inputManager.Activate(grid.CellToWorld(centerCell));
-
         inputManager.OnDragMove += OnDragMove;
         inputManager.OnDragReleased += OnDragReleased;
         inputManager.OnExit += StopPlacement;
@@ -145,30 +131,23 @@ public class PlacementSystem : MonoBehaviour
 
         Transform ghostTransform = preview.GetPreviewTransform();
 
-        bool isAnnihilator = false;
-        if (buildingState is PlacementState || buildingState is TowerMoveState)
-        {
-            int idx = database.objectsData.FindIndex(d => d.ID == _currentTowerID);
-            if (idx >= 0)
-                isAnnihilator = database.objectsData[idx].IsAnnihilator;
-        }
+        // Кнопку поворота показываем для ЛЮБОЙ башни — не только аннигилятора
+        bool canRotate = buildingState is PlacementState || buildingState is TowerMoveState;
 
-        confirmUI.Show(ghostTransform,
+        confirmUI.Show(
+            ghostTransform,
             onConfirm: ConfirmPlacement,
-            onCancel: StopPlacement,
-            isAnnihilator: isAnnihilator,
-            onRotate: OnRotateGhost);
+            onCancel:  StopPlacement,
+            canRotate: canRotate,
+            onRotate:  OnRotateGhost);
     }
 
-    // ── Поворот голограммы (вызывается кнопкой Rotate в UI) ───────────
+    // ── Поворот голограммы ─────────────────────────────────────────────
+    // Вся логика в PreviewSystem.RotatePreview() — модель и курсор.
 
     private void OnRotateGhost()
     {
-        Transform ghost = preview.GetPreviewTransform();
-        if (ghost == null) return;
-
-        // Поворачиваем на 90° по оси Y
-        ghost.Rotate(0f, 90f, 0f, Space.World);
+        preview.RotatePreview();
     }
 
     // ── Confirm / Cancel ───────────────────────────────────────────────
@@ -177,15 +156,13 @@ public class PlacementSystem : MonoBehaviour
     {
         if (buildingState == null) return;
 
-        // ── Читаем поворот голограммы и передаём в state ──────────────
-        // Это ключевой момент: поворот голограммы → реальный поворот башни.
-        Transform ghost = preview.GetPreviewTransform();
-        Quaternion ghostRotation = ghost != null ? ghost.rotation : Quaternion.identity;
+        // Берём поворот прямо из PreviewSystem — он всегда актуален
+        Quaternion rotation = preview.GetPreviewRotation();
 
         if (buildingState is PlacementState ps)
-            ps.SetPlacementRotation(ghostRotation);
+            ps.SetPlacementRotation(rotation);
         else if (buildingState is TowerMoveState tms)
-            tms.SetPlacementRotation(ghostRotation);
+            tms.SetPlacementRotation(rotation);
 
         Vector3Int gridPos = grid.WorldToCell(inputManager.GetSelectedMapPosition());
         buildingState.OnAction(gridPos);
