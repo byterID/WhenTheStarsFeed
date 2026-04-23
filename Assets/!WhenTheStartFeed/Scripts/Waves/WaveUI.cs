@@ -21,15 +21,15 @@ public class WaveUI : MonoBehaviour
 
     private void OnWaveStarted(int waveNumber)
     {
-        waveText.text = $"Волна {waveNumber}";
+        waveText.text = $"Wave {waveNumber}";
         countdownText.text = "";
     }
 
     private void OnCountdownTick(float seconds)
     {
         if (seconds > 0f)
-            countdownText.text = $"До волны: {seconds:F0}с";
+            countdownText.text = $"Prepare: {seconds:F0}с";
         else
-            countdownText.text = "Волна началась!";
+            countdownText.text = "Wave started!";
     }
 }

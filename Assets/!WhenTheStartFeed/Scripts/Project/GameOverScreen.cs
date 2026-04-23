@@ -91,7 +91,7 @@ public class GameOverScreen : MonoBehaviour
 
         // Обновляем текст
         if (_waveReachedText != null)
-            _waveReachedText.text = $"Вы дошли до волны: {waveReached}";
+            _waveReachedText.text = $"Max wave: {waveReached}";
 
         // Плавно появляемся (fadeIn)
         yield return StartCoroutine(FadeIn());
