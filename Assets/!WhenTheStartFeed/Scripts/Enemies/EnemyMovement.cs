@@ -3,64 +3,99 @@
 /// <summary>
 /// Движение врага по маршруту.
 ///
-/// Порядок инициализации:
-///   Awake  — кэшируем компоненты (GetComponent безопасен здесь).
-///   Start  — ничего не делаем (маршрут задаётся через SetPath из EnemySpawner).
-///   SetPath — вызывается из EnemySpawner сразу после Instantiate,
-///             ДО первого Update, поэтому всё корректно.
+/// Порядок инициализации (из EnemySpawner):
+///   1. Instantiate(prefab)  → Awake отрабатывает автоматически
+///   2. InitFromData(speed)  → передаём скорость из EnemiesDatabaseSO
+///   3. SetPath(waypoints)   → задаём маршрут и запускаем движение
 ///
-/// Когда враг доходит до конца пути:
-///   1. Движение останавливается (_isMoving = false).
-///   2. Вызывается EnemyActions.StartAttackingBase() — тот запускает AttackLoop.
-///   3. Враг остаётся на месте и уязвим к башням (TakeDamage работает).
+/// Баг «очередь у базы»:
+///   Враги с Rigidbody/Collider блокировали друг друга у последней точки.
+///   Задние не могли подойти на 0.1f → StartAttackingBase не вызывался.
+///   Решение: последняя точка использует увеличенный порог _baseArrivalRadius,
+///   плюс OnTriggerEnter на коллайдере базы дублирует вызов StartAttackingBase.
 /// </summary>
 public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] private float _speed = 3f;
 
-    // Маршрут — назначается из EnemySpawner.SetPath()
+    [Tooltip("Радиус в котором промежуточные точки считаются достигнутыми (м).")]
+    [SerializeField] private float _waypointRadius = 0.1f;
+
+    [Tooltip("Радиус в котором последняя точка (база) считается достигнутой (м). " +
+             "Должен быть достаточно большим чтобы несколько врагов могли атаковать одновременно.")]
+    [SerializeField] private float _baseArrivalRadius = 1.5f;
+
     private Transform[] _moveTargets;
     private int _currentTargetIndex;
     private bool _isMoving;
 
-    // ── Кэш компонентов ───────────────────────────────────────────────
-    private EnemyActions _enemyActions;
+    // ── Направление движения — читается EnemyAnimator ─────────────────
+    private Vector3 _currentMoveDirection = Vector3.forward;
 
-    // ── Lifecycle ─────────────────────────────────────────────────────
+    /// <summary>Нормализованное направление к текущей цели. Vector3.zero если стоим.</summary>
+    public Vector3 CurrentMoveDirection => _isMoving ? _currentMoveDirection : Vector3.zero;
+
+    /// <summary>Враг сейчас движется по маршруту.</summary>
+    public bool IsMoving => _isMoving;
+
+    // ── Кэш ───────────────────────────────────────────────────────────
+    private EnemyActions _enemyActions;
 
     private void Awake()
     {
-        // Awake — правильное место для GetComponent на том же GameObject.
-        // Гарантированно выполняется до Start и до вызовов извне (SetPath).
         _enemyActions = GetComponent<EnemyActions>();
     }
 
-    // ── Публичный API (вызывается из EnemySpawner) ────────────────────
+    // ── Публичный API ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// Вызывается из EnemySpawner после Instantiate.
+    /// Устанавливает скорость из EnemiesDatabaseSO.moveSpeed.
+    /// </summary>
+    public void InitFromData(float speed)
+    {
+        if (speed > 0f)
+            _speed = speed;
+    }
+
+    /// <summary>
+    /// Задаёт маршрут и немедленно начинает движение.
+    /// </summary>
     public void SetPath(Transform[] path)
     {
         _moveTargets = path;
         _currentTargetIndex = 0;
         _isMoving = true;
+
+        if (path != null && path.Length > 0)
+            UpdateMoveDirection(path[0].position);
     }
 
-    /// <summary>Внешняя остановка/возобновление движения (для будущих систем)</summary>
+    /// <summary>Пауза / возобновление движения.</summary>
     public void SetMoving(bool moving)
     {
         _isMoving = moving;
+    }
+
+    // ── OnTriggerEnter — резервный вызов атаки ────────────────────────
+    // Если враг оказался внутри триггера базы (например, его толкнули другие
+    // враги или он пришёл сбоку) — StartAttackingBase вызывается здесь.
+    // Требует: на объекте MainBase должен быть Collider с Is Trigger = true
+    // и тег "Base" (или используй Layer "Base" и проверяй layer).
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Base"))
+            ArriveAtBase();
     }
 
     // ── Движение ──────────────────────────────────────────────────────
 
     private void Update()
     {
-        // Не двигаемся если: остановлены, маршрут не назначен,
-        // или уже атакуем базу
         if (!_isMoving) return;
         if (_moveTargets == null || _moveTargets.Length == 0) return;
         if (_currentTargetIndex >= _moveTargets.Length) return;
 
-        // Если EnemyActions уже переключился в режим атаки — останавливаемся
         if (_enemyActions != null && _enemyActions.IsAttackingBase)
         {
             _isMoving = false;
@@ -68,22 +103,43 @@ public class EnemyMovement : MonoBehaviour
         }
 
         Transform target = _moveTargets[_currentTargetIndex];
+        UpdateMoveDirection(target.position);
 
-        // Двигаемся к следующей точке маршрута
         float step = _speed * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, target.position, step);
 
-        // Достигли текущей точки — переходим к следующей
-        if (Vector3.Distance(transform.position, target.position) < 0.1f)
+        bool isLastWaypoint = (_currentTargetIndex == _moveTargets.Length - 1);
+        float radius = isLastWaypoint ? _baseArrivalRadius : _waypointRadius;
+
+        if (Vector3.Distance(transform.position, target.position) < radius)
         {
             _currentTargetIndex++;
 
             if (_currentTargetIndex >= _moveTargets.Length)
             {
-                // Конец пути — начинаем атаку базы, останавливаем движение
-                _isMoving = false;
-                _enemyActions?.StartAttackingBase();
+                ArriveAtBase();
+            }
+            else
+            {
+                UpdateMoveDirection(_moveTargets[_currentTargetIndex].position);
             }
         }
+    }
+
+    // ── Прибытие к базе ───────────────────────────────────────────────
+
+    private void ArriveAtBase()
+    {
+        if (_enemyActions != null && _enemyActions.IsAttackingBase) return;
+        _isMoving = false;
+        _enemyActions?.StartAttackingBase();
+    }
+
+    private void UpdateMoveDirection(Vector3 targetPosition)
+    {
+        Vector3 dir = targetPosition - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.001f)
+            _currentMoveDirection = dir.normalized;
     }
 }
