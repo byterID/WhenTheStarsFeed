@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
 /// <summary>
 /// Контроллер камеры. Работает на PC и Android/iOS без New Input System.
@@ -17,32 +17,32 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float _minZoom = 5f;
     [SerializeField] private float _maxZoom = 40f;
     [SerializeField] private float _desktopScrollSpeed = 5f;
-    [SerializeField] private float _mobilePinchSpeed   = 0.04f;
+    [SerializeField] private float _mobilePinchSpeed = 0.04f;
 
     [Header("Перемещение")]
     [SerializeField] private float _dragSpeed = 0.035f;
     [Tooltip("Инвертировать направление перетаскивания")]
-    [SerializeField] private bool  _invertDrag = false;
+    [SerializeField] private bool _invertDrag = false;
 
     [Header("Сглаживание")]
-    [SerializeField] private float _posLerp  = 12f;
+    [SerializeField] private float _posLerp = 12f;
     [SerializeField] private float _zoomLerp = 10f;
 
     [Header("Границы карты (опционально)")]
     [SerializeField] private bool _useBounds = false;
-    [SerializeField] private Rect _bounds    = new Rect(-20f, -20f, 40f, 40f);
+    [SerializeField] private Rect _bounds = new Rect(-20f, -20f, 40f, 40f);
 
     // ── внутреннее состояние ──────────────────────────────────────────
     private Vector3 _targetPos;
-    private float   _targetZoom;
+    private float _targetZoom;
 
     // drag одним пальцем / мышью
-    private bool    _isDragging;
+    private bool _isDragging;
     private Vector2 _dragPrevScreen;
-    private int     _dragFingerId = -1;
+    private int _dragFingerId = -1;
 
     // pinch двумя пальцами
-    private bool  _isPinching;
+    private bool _isPinching;
     private float _pinchPrevDist;
 
     private bool _locked; // GameOver — ввод заморожен
@@ -60,7 +60,7 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        _targetPos  = transform.position;
+        _targetPos = transform.position;
         _targetZoom = _cameraPivot != null ? _cameraPivot.localPosition.y : (_minZoom + _maxZoom) * 0.5f;
 
         if (EndGameManager.Instance != null)
@@ -94,7 +94,7 @@ public class CameraController : MonoBehaviour
         else
         {
             // ── MOBILE: 2+ пальца = pinch-zoom ───────────────────────
-            _isDragging   = false;
+            _isDragging = false;
             _dragFingerId = -1;
             HandlePinch();
         }
@@ -108,20 +108,20 @@ public class CameraController : MonoBehaviour
     {
         // ПКМ или средняя кнопка — перетаскивание
         bool down = Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2);
-        bool held = Input.GetMouseButton(1)     || Input.GetMouseButton(2);
-        bool up   = Input.GetMouseButtonUp(1)   || Input.GetMouseButtonUp(2);
+        bool held = Input.GetMouseButton(1) || Input.GetMouseButton(2);
+        bool up = Input.GetMouseButtonUp(1) || Input.GetMouseButtonUp(2);
 
         if (down)
         {
             // Не двигаем камеру если нажали на UI
             if (IsScreenPosOverUI(Input.mousePosition)) return;
-            _isDragging    = true;
+            _isDragging = true;
             _dragPrevScreen = Input.mousePosition;
         }
 
         if (held && _isDragging)
         {
-            Vector2 cur   = Input.mousePosition;
+            Vector2 cur = Input.mousePosition;
             Vector2 delta = cur - _dragPrevScreen;
             MoveByScreenDelta(delta);
             _dragPrevScreen = cur;
@@ -137,7 +137,7 @@ public class CameraController : MonoBehaviour
         if (Mathf.Abs(scroll) < 0.001f) return;
 
         _targetZoom -= scroll * _desktopScrollSpeed * 10f;
-        _targetZoom  = Mathf.Clamp(_targetZoom, _minZoom, _maxZoom);
+        _targetZoom = Mathf.Clamp(_targetZoom, _minZoom, _maxZoom);
     }
 
     // ═══════════════════ КАСАНИЯ (ANDROID/IOS) ════════════════════════
@@ -152,8 +152,8 @@ public class CameraController : MonoBehaviour
                 // Игнорируем касание по UI-элементам
                 if (IsScreenPosOverUI(t.position)) return;
 
-                _isDragging    = true;
-                _dragFingerId  = t.fingerId;
+                _isDragging = true;
+                _dragFingerId = t.fingerId;
                 _dragPrevScreen = t.position;
                 break;
 
@@ -168,7 +168,7 @@ public class CameraController : MonoBehaviour
             case TouchPhase.Canceled:
                 if (t.fingerId == _dragFingerId)
                 {
-                    _isDragging   = false;
+                    _isDragging = false;
                     _dragFingerId = -1;
                 }
                 break;
@@ -188,14 +188,14 @@ public class CameraController : MonoBehaviour
         if (!_isPinching || t1.phase == TouchPhase.Began)
         {
             _pinchPrevDist = dist;
-            _isPinching    = true;
+            _isPinching = true;
             return;
         }
 
         float delta = dist - _pinchPrevDist;
-        _targetZoom    -= delta * _mobilePinchSpeed;
-        _targetZoom     = Mathf.Clamp(_targetZoom, _minZoom, _maxZoom);
-        _pinchPrevDist  = dist;
+        _targetZoom -= delta * _mobilePinchSpeed;
+        _targetZoom = Mathf.Clamp(_targetZoom, _minZoom, _maxZoom);
+        _pinchPrevDist = dist;
     }
 
     // ═══════════════════ ПРИМЕНЕНИЕ ДВИЖЕНИЯ ═════════════════════════
@@ -205,8 +205,8 @@ public class CameraController : MonoBehaviour
         Camera cam = Camera.main;
         if (cam == null) return;
 
-        Vector3 fwd   = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
-        Vector3 right = Vector3.ProjectOnPlane(cam.transform.right,   Vector3.up).normalized;
+        Vector3 fwd = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
+        Vector3 right = Vector3.ProjectOnPlane(cam.transform.right, Vector3.up).normalized;
 
         Vector3 move = (right * screenDelta.x + fwd * screenDelta.y) * _dragSpeed;
         if (_invertDrag) move = -move;
