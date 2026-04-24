@@ -5,17 +5,6 @@ public enum DeviceType
     Desktop,
     Mobile
 }
-
-/// <summary>
-/// Определяет тип устройства один раз при старте.
-///
-/// Изменения:
-///   - Регистрируется в ServiceLocator.
-///   - Статическое поле CurrentDevice сохранено для удобства
-///     (InputBootstrap и CameraController читают его напрямую).
-///   - Script Execution Order: -100 (самый первый!).
-///     InputBootstrap зависит от DeviceDetector → должен быть позже.
-/// </summary>
 public class DeviceDetector : MonoBehaviour
 {
     public static DeviceType CurrentDevice { get; private set; }

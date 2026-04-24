@@ -2,21 +2,6 @@
 
 /// <summary>
 /// Самонаводящаяся пуля.
-///
-/// УЛУЧШЕНИЯ v4 (VFX):
-///   1. Trail VFX — частицы следа за пулей в полёте (дым, искры, свечение).
-///   2. Hit VFX — эффект попадания ориентирован по направлению полёта.
-///   3. Muzzle Flash — опциональная вспышка при выстреле (отсоединяется от пули).
-///   4. Корректная очистка: trail отсоединяется перед Destroy,
-///      чтобы дотянуть свой lifetime и не исчезнуть резко.
-///
-/// СОХРАНЁННЫЕ УЛУЧШЕНИЯ v3:
-///   - Скорость 28f, LookAt, lead targeting, адаптивный HIT_DISTANCE.
-///
-/// СОХРАНЁННЫЕ ИСПРАВЛЕНИЯ v2:
-///   - Проверка дистанции вместо OnCollisionEnter.
-///   - Init() с damage и armorPenetration.
-///   - OnTriggerEnter как запасной способ попадания.
 /// </summary>
 public class Bullet : MonoBehaviour
 {
@@ -222,14 +207,6 @@ public class Bullet : MonoBehaviour
     /// </summary>
 private void SpawnHitVFX()
 {
-    Debug.Log($"[Bullet] SpawnHitVFX called. Prefab: {_hitVFXPrefab}");
-
-    if (_hitVFXPrefab == null)
-    {
-        Debug.LogWarning("[Bullet] _hitVFXPrefab is NULL!");
-        return;
-    }
-
     Quaternion rotation = Quaternion.LookRotation(_lastMoveDirection);
 
     GameObject vfx = Instantiate(
@@ -238,26 +215,10 @@ private void SpawnHitVFX()
         rotation
     );
 
-    Debug.Log($"[Bullet] VFX spawned at {transform.position}, " +
-              $"rotation: {rotation.eulerAngles}, " +
-              $"scale: {_hitVFXScale}");
-
-    // Проверяем все ParticleSystem в префабе
-    ParticleSystem[] systems = vfx.GetComponentsInChildren<ParticleSystem>();
-    Debug.Log($"[Bullet] Found {systems.Length} ParticleSystems in VFX prefab");
-    foreach (ParticleSystem ps in systems)
-    {
-        Debug.Log($"  - {ps.name}: PlayOnAwake={ps.main.playOnAwake}, " +
-                  $"IsPlaying={ps.isPlaying}, " +
-                  $"MaxParticles={ps.main.maxParticles}, " +
-                  $"Duration={ps.main.duration}");
-    }
-
     if (!Mathf.Approximately(_hitVFXScale, 1f))
         vfx.transform.localScale = Vector3.one * _hitVFXScale;
 
     float lifetime = GetVFXLifetime(vfx, 2f);
-    Debug.Log($"[Bullet] VFX will be destroyed in {lifetime:F2}s");
     Destroy(vfx, lifetime);
 }
 

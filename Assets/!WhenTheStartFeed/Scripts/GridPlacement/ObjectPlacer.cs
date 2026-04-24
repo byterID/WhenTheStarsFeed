@@ -8,9 +8,6 @@ public class ObjectPlacer : MonoBehaviour
 
     private const string TOWER_LAYER_NAME = "Default";
 
-    // ── Сигнатура с towerID, gridCell и rotation ─────────────────────
-    // rotation — поворот из голограммы (игрок мог нажать кнопку Rotate).
-    // Quaternion.identity = поворот по умолчанию из префаба.
     public int PlaceObject(GameObject prefab, Vector3 position, int towerID, Vector3Int gridCell,
                            Quaternion rotation = default)
     {
@@ -31,8 +28,6 @@ public class ObjectPlacer : MonoBehaviour
 
         handler.towerID = towerID;
         handler.gridCell = gridCell;
-
-        Debug.Log($"PlaceObject: towerID={towerID}, gridCell={gridCell}, rotation={rotation.eulerAngles}, handler на объекте={handler.gameObject.name}");
 
         placedGameObjects.Add(newObject);
         return placedGameObjects.Count - 1;

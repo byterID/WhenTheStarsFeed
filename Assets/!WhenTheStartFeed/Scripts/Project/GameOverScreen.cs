@@ -6,38 +6,11 @@ using UnityEngine.UI;
 
 /// <summary>
 /// UI-экран «Игра окончена».
-///
-/// ═══════════════════════════════════════════════════════════════════
-/// ИСПРАВЛЕННЫЙ БАГ: "Can't start coroutine on inactive object"
-/// ═══════════════════════════════════════════════════════════════════
-/// Проблема: gameOverPanel.SetActive(false) в Awake делает объект
-/// неактивным. Если GameOverScreen находится НА ЭТОЙ ЖЕ панели,
-/// то и сам компонент деактивируется → StartCoroutine падает.
-///
-/// Решение: GameOverScreen НЕ деактивирует сам себя.
-/// Вместо этого панель скрывается через CanvasGroup.alpha = 0
-/// и CanvasGroup.blocksRaycasts = false.
-/// Объект остаётся активным, корутина работает нормально.
-///
-/// Настройка на сцене (ВАЖНО читать):
-///   1. Создайте Canvas.
-///   2. Добавьте дочерний Panel — назовите "GameOverPanel".
-///      На этот Panel добавьте компонент CanvasGroup.
-///   3. На "GameOverPanel" добавьте этот компонент GameOverScreen.
-///   4. Внутри Panel создайте:
-///      - TextMeshProUGUI "TitleText"    → "ИГРА ОКОНЧЕНА"
-///      - TextMeshProUGUI "WaveText"     → "Вы дошли до волны: N"
-///      - Button "RestartButton"         → "Начать заново"
-///      - Button "MenuButton"            → "В меню"
-///   5. Назначьте все ссылки в Inspector.
-///   6. CanvasGroup автоматически найдётся если стоит на том же объекте.
-///   7. GameOverPanel должен быть АКТИВНЫМ в иерархии (не SetActive(false)!),
-///      просто невидимым через alpha=0.
 /// </summary>
 public class GameOverScreen : MonoBehaviour
 {
     [Header("Ссылки на UI элементы")]
-    [SerializeField] private CanvasGroup _canvasGroup;           // скрываем через alpha, не SetActive!
+    [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private TextMeshProUGUI _waveReachedText;
     [SerializeField] private Button _restartButton;
@@ -45,26 +18,16 @@ public class GameOverScreen : MonoBehaviour
 
     [Header("Настройки")]
     [SerializeField] private string _mainMenuSceneName = "MainMenu";
-    [SerializeField] private float _showDelay = 1f;              // задержка перед появлением (сек)
-    [SerializeField] private float _fadeInDuration = 0.4f;       // длительность плавного появления
+    [SerializeField] private float _showDelay = 1f;
+    [SerializeField] private float _fadeInDuration = 0.4f;
 
     // ── Lifecycle ─────────────────────────────────────────────────────
 
     private void Awake()
     {
-        // Авто-поиск CanvasGroup на том же объекте
         if (_canvasGroup == null)
             _canvasGroup = GetComponent<CanvasGroup>();
 
-        // Создаём CanvasGroup если нет — не ломаем проект
-        if (_canvasGroup == null)
-        {
-            _canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            Debug.Log("[GameOverScreen] CanvasGroup добавлен автоматически. " +
-                      "Рекомендуется добавить его вручную в Inspector.");
-        }
-
-        // Скрываем через alpha — объект ОСТАЁТСЯ АКТИВНЫМ
         SetVisible(false);
 
         if (_restartButton != null)

@@ -4,14 +4,14 @@ using UnityEngine;
 public class BlockedAreaMarker : MonoBehaviour
 {
     [HideInInspector]
-    public Vector2Int size; // размер в клетках
+    public Vector2Int size;
 
     private void Awake()
     {
         Vector3 s = transform.lossyScale;
         size = new Vector2Int(
-            Mathf.RoundToInt(s.x), // ширина по X
-            Mathf.RoundToInt(s.z)  // длина по Z
+            Mathf.RoundToInt(s.x),
+            Mathf.RoundToInt(s.z)
         );
     }
 }

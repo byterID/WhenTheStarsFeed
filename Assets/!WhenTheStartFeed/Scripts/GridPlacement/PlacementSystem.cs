@@ -44,7 +44,6 @@ public class PlacementSystem : MonoBehaviour
 
     public void StartMoving(TowerClickHandler tower)
     {
-        Debug.Log($"StartMoving: towerID={tower.towerID}, gridCell={tower.gridCell}");
         TowerClickHandler.DeselectAll();
         _currentTowerID = tower.towerID;
         StopPlacement();
@@ -131,7 +130,6 @@ public class PlacementSystem : MonoBehaviour
 
         Transform ghostTransform = preview.GetPreviewTransform();
 
-        // Кнопку поворота показываем для ЛЮБОЙ башни — не только аннигилятора
         bool canRotate = buildingState is PlacementState || buildingState is TowerMoveState;
 
         confirmUI.Show(
@@ -143,7 +141,6 @@ public class PlacementSystem : MonoBehaviour
     }
 
     // ── Поворот голограммы ─────────────────────────────────────────────
-    // Вся логика в PreviewSystem.RotatePreview() — модель и курсор.
 
     private void OnRotateGhost()
     {
@@ -188,11 +185,6 @@ public class PlacementSystem : MonoBehaviour
         lastDetectedPosition = Vector3Int.zero;
         _isDragging = false;
         buildingState = null;
-    }
-
-    private void Update()
-    {
-        // Движение голограммы только через OnDragMove
     }
 
     // ── RegisterBlockedAreas ───────────────────────────────────────────

@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Лёгкий ServiceLocator.
-/// Вместо GameObject.Find("SoundFeedback") пишем:
+/// Пример: Вместо GameObject.Find("SoundFeedback") пишем:
 ///     ServiceLocator.Get<SoundFeedback>()
 ///
 /// Регистрация происходит в Awake каждого сервиса:

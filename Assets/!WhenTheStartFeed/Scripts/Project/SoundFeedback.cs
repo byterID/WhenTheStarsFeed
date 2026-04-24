@@ -3,33 +3,6 @@ using UnityEngine;
 /// <summary>
 /// Центральная система звука игры.
 /// Регистрируется в ServiceLocator — все скрипты получают её через TryGet.
-///
-/// ═══════════════════════════════════════════════════════════════
-/// АРХИТЕКТУРА
-/// ═══════════════════════════════════════════════════════════════
-///
-/// SFX (одиночные звуки)  — AudioSource _sfxSource   (Play One Shot)
-/// Музыка                 — AudioSource _musicSource  (loop)
-/// Ambient / окружение    — AudioSource _ambientSource (loop)
-/// Огнемёт аннигилятора   — AudioSource _flamethrowerSource (loop, fade)
-///
-/// Все четыре AudioSource должны быть дочерними объектами
-/// и назначены в Inspector.
-///
-/// ═══════════════════════════════════════════════════════════════
-/// НАСТРОЙКА В INSPECTOR
-/// ═══════════════════════════════════════════════════════════════
-///
-/// 1. Создай пустой GameObject «SoundManager» на сцене.
-/// 2. Добавь компонент SoundFeedback.
-/// 3. Создай 4 дочерних GameObject:
-///      «SFX_Source»         — AudioSource, Play On Awake = OFF
-///      «Music_Source»       — AudioSource, Play On Awake = OFF, Loop = ON
-///      «Ambient_Source»     — AudioSource, Play On Awake = OFF, Loop = ON
-///      «Flamethrower_Source»— AudioSource, Play On Awake = OFF, Loop = ON
-/// 4. Назначь все 4 объекта в поля ниже.
-/// 5. Заполни поля AudioClip (см. секции).
-/// 6. Для музыки и амбиента настрой Volume на 0.3–0.5.
 /// </summary>
 public class SoundFeedback : MonoBehaviour
 {

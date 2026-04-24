@@ -13,7 +13,6 @@ public class PlacementState : IBuildingState
     SoundFeedback soundFeedback;
     MoneyManager moneyManager;
 
-    // Поворот — устанавливается из PlacementSystem перед OnAction
     private Quaternion _placementRotation = Quaternion.identity;
 
     public void SetPlacementRotation(Quaternion rotation)
@@ -72,7 +71,6 @@ public class PlacementState : IBuildingState
         int towerCost = database.objectsData[selectedObjectIndex].Cost;
         if (!moneyManager.TrySpend(towerCost))
         {
-            Debug.Log("Недостаточно денег! Нужно: " + towerCost + ", есть: " + moneyManager.CurrentMoney);
             soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
@@ -93,8 +91,6 @@ public class PlacementState : IBuildingState
 
         previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), false);
         soundFeedback.PlaySound(SoundType.Place);
-
-        Debug.Log("Башня куплена! Осталось денег: " + moneyManager.CurrentMoney);
     }
 
     private bool CheckPlacementValidity(Vector3Int gridPosition, Vector2Int size)

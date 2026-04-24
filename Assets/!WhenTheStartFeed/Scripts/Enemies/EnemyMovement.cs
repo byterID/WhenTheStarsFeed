@@ -2,17 +2,6 @@
 
 /// <summary>
 /// Движение врага по маршруту.
-///
-/// Порядок инициализации (из EnemySpawner):
-///   1. Instantiate(prefab)  → Awake отрабатывает автоматически
-///   2. InitFromData(speed)  → передаём скорость из EnemiesDatabaseSO
-///   3. SetPath(waypoints)   → задаём маршрут и запускаем движение
-///
-/// Баг «очередь у базы»:
-///   Враги с Rigidbody/Collider блокировали друг друга у последней точки.
-///   Задние не могли подойти на 0.1f → StartAttackingBase не вызывался.
-///   Решение: последняя точка использует увеличенный порог _baseArrivalRadius,
-///   плюс OnTriggerEnter на коллайдере базы дублирует вызов StartAttackingBase.
 /// </summary>
 public class EnemyMovement : MonoBehaviour
 {

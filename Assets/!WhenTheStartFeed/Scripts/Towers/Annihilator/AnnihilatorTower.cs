@@ -4,22 +4,6 @@ using UnityEngine;
 
 /// <summary>
 /// Башня-аннигилятор. Работает циклически: Зарядка → Стрельба → Перезарядка.
-///
-/// Исправления и улучшения:
-///   - Убран GameObject.Find("SoundFeedback") → ServiceLocator.TryGet.
-///   - _detectionZone и _fireZone проверяются на null в OnEnable/OnDisable.
-///   - CycleCoroutine не запускается снова если уже идёт (двойной guard).
-///   - Добавлена проверка GameManager.IsPlaying — цикл прерывается при Game Over.
-///   - StopCycle вызывает StopAllVFX и правильно сбрасывает состояние.
-///   - Update с очисткой null-врагов перенесён в AnnihilatorDetectionZone
-///     (там он уже есть) — в AnnihilatorTower Update больше не нужен.
-///
-/// Архитектурная заметка про AnnihilatorDetectionZone:
-///   В текущей реализации там есть Update с RemoveWhere(e => e == null) —
-///   это правильно. Но события OnEnemyEntered / OnZoneEmpty не перезапускаются
-///   когда null-объект убирается. Если враг умирает внутри зоны (Destroy без
-///   OnTriggerExit), то HasEnemies станет false только в следующем Update.
-///   Это приемлемо для данной механики.
 /// </summary>
 public class AnnihilatorTower : MonoBehaviour
 {

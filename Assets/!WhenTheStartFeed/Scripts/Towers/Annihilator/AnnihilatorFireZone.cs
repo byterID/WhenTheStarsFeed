@@ -1,10 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Зона нанесения урона. Может быть длиннее зоны обнаружения.
-/// Отдельный GameObject дочерний к башне.
-/// </summary>
 public class AnnihilatorFireZone : MonoBehaviour
 {
     private readonly HashSet<GameObject> _enemies = new();
@@ -21,7 +17,6 @@ public class AnnihilatorFireZone : MonoBehaviour
             _enemies.Remove(other.gameObject);
     }
 
-    /// <summary>Возвращает список врагов с интерфейсом IDamageable</summary>
     public List<IDamageable> GetEnemiesInZone()
     {
         _enemies.RemoveWhere(e => e == null);

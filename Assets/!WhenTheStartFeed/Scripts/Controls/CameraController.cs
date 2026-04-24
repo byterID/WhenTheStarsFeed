@@ -6,18 +6,6 @@ using System.Collections.Generic;
 /// Контроллер камеры. Работает на PC и Android/iOS без New Input System.
 /// Использует только Legacy Input (Input.GetTouch, Input.mousePosition) —
 /// он работает везде и не требует настройки Input Actions.
-///
-/// НАСТРОЙКА ИЕРАРХИИ:
-///   CameraRig          ← этот скрипт здесь
-///   └── CameraPivot    ← пустой объект, его Y = уровень зума
-///       └── Main Camera
-///
-/// ПОЛЯ INSPECTOR:
-///   Camera Pivot       → перетащи CameraPivot
-///   Min Zoom           → минимальная высота камеры (ближе к земле)
-///   Max Zoom           → максимальная высота камеры (дальше от земли)
-///   Drag Speed         → скорость перетаскивания (0.02 - 0.05)
-///   Mobile Pinch Speed → скорость зума пальцами (0.02 - 0.08)
 /// </summary>
 public class CameraController : MonoBehaviour
 {

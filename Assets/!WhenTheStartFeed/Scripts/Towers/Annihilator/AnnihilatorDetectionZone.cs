@@ -5,9 +5,6 @@ using UnityEngine;
 /// <summary>
 /// Зона обнаружения врагов Аннигилятора.
 /// Хранит список GameObject врагов в зоне.
-///
-/// ИСПРАВЛЕНИЕ: Update теперь корректно стреляет событие OnZoneEmpty
-/// когда враг умер (Destroy) внутри триггера без вызова OnTriggerExit.
 /// </summary>
 public class AnnihilatorDetectionZone : MonoBehaviour
 {

@@ -5,34 +5,6 @@ using UnityEngine;
 ///
 /// Намеренно вынесен в отдельный компонент — не затрагивает логику
 /// EnemyMovement и EnemyActions, только читает их состояние.
-///
-/// ═══════════════════════════════════════════════════════════════
-/// НАСТРОЙКА ANIMATOR CONTROLLER
-/// ═══════════════════════════════════════════════════════════════
-///
-/// Параметры (вкладка Parameters в окне Animator):
-///   "Speed"   — Float   (0 = Idle/Attack, 1 = Run)
-///   "Attack"  — Bool    (true = Attack, false = Idle/Run)
-///
-/// Состояния:
-///   Idle    — Default State (правой кнопкой → Set as Layer Default State)
-///   Run     — анимация бега
-///   Attack  — анимация атаки
-///
-/// Переходы:
-///   Idle   → Run    : Speed > 0.1   | Has Exit Time OFF | Duration 0.1
-///   Run    → Idle   : Speed < 0.1   | Has Exit Time OFF | Duration 0.15
-///   Any    → Attack : Attack = true  | Has Exit Time OFF | Duration 0.05
-///   Attack → Idle   : Attack = false | Has Exit Time OFF | Duration 0.1
-///
-/// ═══════════════════════════════════════════════════════════════
-/// НАСТРОЙКА В INSPECTOR
-/// ═══════════════════════════════════════════════════════════════
-///
-/// Animator       — Animator дочерней модели (если пусто — ищется автоматически)
-/// Rotation Speed — градусов/сек поворота к цели, 0 = мгновенно (рекомендуется 360–720)
-/// Base Transform — Transform базы для поворота при атаке (если пусто — ищется через ServiceLocator)
-/// Move Threshold — минимальная скорость перемещения для включения анимации Run
 /// </summary>
 [RequireComponent(typeof(EnemyMovement))]
 [RequireComponent(typeof(EnemyActions))]

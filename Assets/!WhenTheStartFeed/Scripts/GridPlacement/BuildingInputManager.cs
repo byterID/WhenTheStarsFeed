@@ -6,10 +6,6 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Менеджер ввода для размещения башен.
 /// Использует только Legacy Input — работает на PC и Android/iOS.
-///
-/// ВАЖНО: для корректной работы IsPointerOverUI на Android
-/// в EventSystem должен стоять компонент "Physics Raycaster" на камере
-/// и "Graphic Raycaster" на Canvas. Это стандартная настройка Unity UI.
 /// </summary>
 public class BuildingInputManager : MonoBehaviour
 {

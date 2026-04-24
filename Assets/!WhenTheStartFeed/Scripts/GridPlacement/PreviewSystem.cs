@@ -13,10 +13,6 @@ public class PreviewSystem : MonoBehaviour
     [SerializeField] private Transform _Dynamic;
 
     // ── Ссылка на Grid для точного расчёта смещения курсора ──────────
-    // Grid.CellToWorld() возвращает УГОЛ клетки (левый нижний corner).
-    // Курсор (cellIndicator) масштабируется от своего центра, поэтому
-    // его нужно сдвинуть на половину занимаемого прямоугольника.
-    // Формула: offset = (size - 1) * cellSize * 0.5
     [SerializeField] private Grid _grid;
 
     private const string PREVIEW_LAYER_NAME = "Preview";
@@ -168,14 +164,6 @@ public class PreviewSystem : MonoBehaviour
 
     private void MoveCursor(Vector3 position)
     {
-        // CellToWorld() даёт угол клетки.
-        // cellIndicator масштабируется от своего центра → нужно сдвинуть
-        // на (size-1)*cellSize/2 чтобы угол курсора совпал с углом клетки.
-        //
-        // Пример: башня 2×3, cellSize=1
-        //   без поворота:  offset = ((2-1)/2, 0, (3-1)/2) = (0.5, 0, 1.0)
-        //   после 90°:     size становится 3×2
-        //                  offset = ((3-1)/2, 0, (2-1)/2) = (1.0, 0, 0.5)
         Vector3 cellSize = _grid != null ? _grid.cellSize : Vector3.one;
 
         Vector3 offset = new Vector3(
