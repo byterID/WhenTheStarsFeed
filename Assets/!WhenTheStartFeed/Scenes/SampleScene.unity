@@ -6047,7 +6047,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 927066283}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &333100557
 PrefabInstance:
@@ -19473,7 +19473,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2169194}
-  - {fileID: 329593279}
   - {fileID: 1982578155}
   - {fileID: 1937801532}
   m_Father: {fileID: 0}
@@ -20336,24 +20335,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce4058707be7c8f4cb67018ff662e146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
-  _cameraRig: {fileID: 649485908}
-  _cameraTransform: {fileID: 963194228}
-  _dragSpeed: 0.025
-  _invertDrag: 0
-  _desktopDragButton: 2
-  _keyboardSpeed: 15
-  _useKeyboard: 1
-  _useEdgeScroll: 0
-  _edgeScrollSpeed: 20
-  _edgeScrollZone: 20
-  _zoomSpeed: 8
+  _cameraPivot: {fileID: 969288790}
   _minZoom: 5
   _maxZoom: 40
-  _mobileZoomSpeed: 0.05
-  _moveLerpSpeed: 12
-  _zoomLerpSpeed: 10
-  _useMapBounds: 0
-  _mapBounds:
+  _desktopScrollSpeed: 5
+  _mobilePinchSpeed: 0.04
+  _dragSpeed: 0.025
+  _invertDrag: 0
+  _posLerp: 12
+  _zoomLerp: 10
+  _useBounds: 1
+  _bounds:
     serializedVersion: 2
     x: -20
     y: -20
@@ -37922,6 +37914,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1746943146}
   - component: {fileID: 1746943147}
+  - component: {fileID: 1746943148}
+  - component: {fileID: 1746943149}
   m_Layer: 0
   m_Name: PlayerInput
   m_TagString: Untagged
@@ -37990,6 +37984,32 @@ MonoBehaviour:
   m_DefaultActionMap: Camera
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 963194227}
+--- !u!114 &1746943148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1746943144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a783cf04ab494f343bf68310c18c47a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputBootstrap
+  desktopControls: {fileID: 0}
+  mobileControls: {fileID: 0}
+--- !u!114 &1746943149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1746943144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1da93a31a19c334f8e6b0d5ea992a78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeviceDetector
 --- !u!1001 &1747399821
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56834,3 +56854,4 @@ SceneRoots:
   - {fileID: 1746943146}
   - {fileID: 1108810315}
   - {fileID: 1331444538}
+  - {fileID: 329593279}

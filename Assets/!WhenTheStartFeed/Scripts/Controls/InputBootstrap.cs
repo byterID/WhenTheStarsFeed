@@ -1,40 +1,37 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Активирует нужный набор контролов (Desktop / Mobile).
+/// Упрощённый InputBootstrap.
 ///
-/// Изменения:
-///   - Зависимость от DeviceDetector решена через Script Execution Order:
-///     DeviceDetector (-100) → InputBootstrap (-95) → остальные.
-///   - При GameOver блокирует управление камерой и размещением.
+/// Раньше здесь была логика «выбрать desktop или mobile контролы»,
+/// но CameraController теперь сам определяет тип ввода по Input.touchCount.
+/// Этот скрипт остался только для блокировки ввода при GameOver.
 ///
-/// Настройка на сцене:
-///   Создайте два дочерних GameObject:
-///     "DesktopControls" — содержит CameraController (desktop-режим)
-///     "MobileControls"  — содержит CameraController (mobile-режим)
-///   Назначьте их в Inspector этого компонента.
-///
-///   !!! ВАЖНО: оба объекта должны быть АКТИВНЫМИ в иерархии изначально,
-///   InputBootstrap сам скроет ненужный в Awake.
+/// НАСТРОЙКА:
+///   Оставьте этот компонент на сцене (если он уже есть).
+///   Поля desktopControls и mobileControls больше не нужны —
+///   можно убрать их из Inspector или оставить пустыми.
 /// </summary>
 public class InputBootstrap : MonoBehaviour
 {
+    // Поля оставлены для обратной совместимости (чтобы не сломать Inspector)
+    // но логика выбора desktop/mobile удалена — она была источником проблем
     [SerializeField] private GameObject desktopControls;
     [SerializeField] private GameObject mobileControls;
 
     private void Awake()
     {
-        bool isMobile = DeviceDetector.CurrentDevice == DeviceType.Mobile;
+        // Активируем оба объекта (если назначены) — CameraController сам разберётся
+        if (desktopControls != null) desktopControls.SetActive(true);
+        if (mobileControls  != null) mobileControls.SetActive(true);
 
-        if (desktopControls != null) desktopControls.SetActive(!isMobile);
-        if (mobileControls != null) mobileControls.SetActive(isMobile);
-
-        Debug.Log($"[InputBootstrap] Активированы: {(isMobile ? "Mobile" : "Desktop")} контролы");
+        Debug.Log($"[InputBootstrap] Platform: {Application.platform}, " +
+                  $"isMobile: {Application.isMobilePlatform}, " +
+                  $"TouchSupport: {Input.touchSupported}");
     }
 
     private void Start()
     {
-        // Подписываемся на GameOver — блокируем управление
         if (EndGameManager.Instance != null)
             EndGameManager.Instance.OnStateChanged += OnGameStateChanged;
     }
@@ -47,11 +44,9 @@ public class InputBootstrap : MonoBehaviour
 
     private void OnGameStateChanged(GameState state)
     {
-        if (state == GameState.GameOver)
-        {
-            // Отключаем все контролы — игрок ничего не может делать пока показан Game Over
-            if (desktopControls != null) desktopControls.SetActive(false);
-            if (mobileControls != null) mobileControls.SetActive(false);
-        }
+        if (state != GameState.GameOver) return;
+
+        if (desktopControls != null) desktopControls.SetActive(false);
+        if (mobileControls  != null) mobileControls.SetActive(false);
     }
 }
