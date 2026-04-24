@@ -4,70 +4,77 @@ using UnityEngine;
 
 public class GridData
 {
-    // Словарь, который хранит данные о всех установленных объектах
-    // Ключ = позиция клетки в сетке (Vector3Int)
-    // Значение = информация о том, какие клетки занимает объект, его ID и индекс в ObjectPlacer
     Dictionary<Vector3Int, PlacementData> placedObjects = new();
 
-    // Добавляет объект на сетку
     public void AddObjectAt(Vector3Int gridPosition,
                             Vector2Int objectSize,
                             int ID,
                             int placedObjectIndex)
     {
-        List<Vector3Int> positionToOccupy = CalculatePositions(gridPosition, objectSize);   // Вычисляем все клетки, которые объект займёт
-        PlacementData data = new PlacementData(positionToOccupy, ID, placedObjectIndex);    // Создаём объект данных для всех этих клеток
-        foreach (var pos in positionToOccupy) // Добавляем в словарь
+        List<Vector3Int> positionToOccupy = CalculatePositions(gridPosition, objectSize);
+        PlacementData data = new PlacementData(positionToOccupy, ID, placedObjectIndex);
+        foreach (var pos in positionToOccupy)
         {
             if (placedObjects.ContainsKey(pos))
-                throw new Exception($"Dictionary already contains this cell positiojn {pos}"); // Защита: если клетка уже занята, выбрасываем исключение
+                throw new Exception($"Dictionary already contains this cell positiojn {pos}");
             placedObjects[pos] = data;
         }
     }
 
-    private List<Vector3Int> CalculatePositions(Vector3Int gridPosition, Vector2Int objectSize) // Вычисляет список клеток, которые займёт объект
+    public void AddObjectAtSafe(Vector3Int gridPosition,
+                                Vector2Int objectSize,
+                                int ID,
+                                int placedObjectIndex)
+    {
+        List<Vector3Int> positionToOccupy = CalculatePositions(gridPosition, objectSize);
+        PlacementData data = new PlacementData(positionToOccupy, ID, placedObjectIndex);
+        foreach (var pos in positionToOccupy)
+        {
+            placedObjects[pos] = data; // просто перезаписываем без исключения
+        }
+    }
+
+    public void RemoveObjectAtSafe(Vector3Int gridPosition)
+    {
+        if (!placedObjects.ContainsKey(gridPosition)) return; // нет объекта — тихо выходим
+        foreach (var pos in placedObjects[gridPosition].occupiedPositions)
+            placedObjects.Remove(pos);
+    }
+
+    private List<Vector3Int> CalculatePositions(Vector3Int gridPosition, Vector2Int objectSize)
     {
         List<Vector3Int> returnVal = new();
         for (int x = 0; x < objectSize.x; x++)
-        {
             for (int y = 0; y < objectSize.y; y++)
-            {
                 returnVal.Add(gridPosition + new Vector3Int(x, 0, y));
-            }
-        }
         return returnVal;
     }
 
-    public bool CanPlaceObejctAt(Vector3Int gridPosition, Vector2Int objectSize)    // Проверяет, можно ли разместить объект в данной позиции
+    public bool CanPlaceObejctAt(Vector3Int gridPosition, Vector2Int objectSize)
     {
         List<Vector3Int> positionToOccupy = CalculatePositions(gridPosition, objectSize);
-        foreach (var pos in positionToOccupy)   // Если хотя бы одна клетка занята — нельзя ставить
-        {
+        foreach (var pos in positionToOccupy)
             if (placedObjects.ContainsKey(pos))
                 return false;
-        }
         return true;
     }
 
-    internal int GetRepresentationIndex(Vector3Int gridPosition)    //Проверка: есть ли объект на клетке
-    {                                                               //Если есть → возвращает индекс GameObject, чтобы его удалить или взаимодействовать
-        if (placedObjects.ContainsKey(gridPosition) == false)       //Если нет → возвращает -1 (нет объекта)
-            return -1;                                              
+    internal int GetRepresentationIndex(Vector3Int gridPosition)
+    {
+        if (!placedObjects.ContainsKey(gridPosition)) return -1;
         return placedObjects[gridPosition].PlacedObjectIndex;
     }
 
-    internal void RemoveObjectAt(Vector3Int gridPosition)   // Удаляет объект из всех клеток, которые он занимает
+    internal void RemoveObjectAt(Vector3Int gridPosition)
     {
         foreach (var pos in placedObjects[gridPosition].occupiedPositions)
-        {
             placedObjects.Remove(pos);
-        }
     }
 }
 
-public class PlacementData  // Данные о размещённом объекте
+public class PlacementData
 {
-    public List<Vector3Int> occupiedPositions; // Список всех клеток, которые занимает объект
+    public List<Vector3Int> occupiedPositions;
     public int ID { get; private set; }
     public int PlacedObjectIndex { get; private set; }
 

@@ -6,21 +6,21 @@ public class RemovingState : IBuildingState
     Grid grid;
     PreviewSystem previewSystem;
     GridData floorData;
-    GridData furnitureData;
+    GridData towersData;
     ObjectPlacer objectPlacer;
     SoundFeedback soundFeedback; 
 
     public RemovingState(Grid grid, // При создании сразу включаем предпросмотр для удаления
                          PreviewSystem previewSystem,
                          GridData floorData,
-                         GridData furnitureData,
+                         GridData towersData,
                          ObjectPlacer objectPlacer,
                          SoundFeedback soundFeedback)
     {
         this.grid = grid;
         this.previewSystem = previewSystem;
         this.floorData = floorData;
-        this.furnitureData = furnitureData;
+        this.towersData = towersData;
         this.objectPlacer = objectPlacer;
         this.soundFeedback = soundFeedback;
         previewSystem.StartShowingRemovePreview();
@@ -34,9 +34,9 @@ public class RemovingState : IBuildingState
     public void OnAction(Vector3Int gridPosition)   //Удаление
     {
         GridData selectedData = null;
-        if(furnitureData.CanPlaceObejctAt(gridPosition,Vector2Int.one) == false)
+        if(towersData.CanPlaceObejctAt(gridPosition,Vector2Int.one) == false)
         {
-            selectedData = furnitureData;
+            selectedData = towersData;
         }
         else if(floorData.CanPlaceObejctAt(gridPosition, Vector2Int.one) == false)
         {
@@ -58,7 +58,7 @@ public class RemovingState : IBuildingState
             objectPlacer.RemoveObjectAt(gameObjectIndex);           // Удаляем объект из сцены
         }
         Vector3 cellPosition = grid.CellToWorld(gridPosition);      // обновляем предпросмотр на текущей клетке
-        previewSystem.UpdatePosition(cellPosition, CheckIfSelectionIsValid(gridPosition));
+        //previewSystem.UpdatePosition(cellPosition, CheckIfSelectionIsValid(gridPosition));
     }
 
     // Проверяем, можно ли удалить объект
@@ -67,13 +67,13 @@ public class RemovingState : IBuildingState
     {
         // Если обе сетки говорят "тут пусто" => нельзя удалять
         // Инверсия делает valid = true только если есть объект
-        return !(furnitureData.CanPlaceObejctAt(gridPosition, Vector2Int.one) &&
+        return !(towersData.CanPlaceObejctAt(gridPosition, Vector2Int.one) &&
             floorData.CanPlaceObejctAt(gridPosition, Vector2Int.one));
     }
 
     public void UpdateState(Vector3Int gridPosition) // Когда игрок двигает курсор — обновляем подсветку
     {
         bool validity = CheckIfSelectionIsValid(gridPosition);
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), validity);// Переносим предпросмотр на новую клетку
+        //previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), validity);// Переносим предпросмотр на новую клетку
     }
 }

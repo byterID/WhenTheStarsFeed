@@ -11,9 +11,12 @@ public class EnemiesDatabaseSO : ScriptableObject
 [Serializable]
 public class EnemiesData
 {
-    [field: SerializeField] public string Name { get; private set; }
+    [field: SerializeField] public string enemyName { get; private set; }
     [field: SerializeField] public int ID { get; private set; }
-    [field: SerializeField] public float HP { get; private set; }
-    [field: SerializeField] public float MoveSpeed { get; private set; }
-    [field: SerializeField] public GameObject Prefab { get; private set; }
+    [field: SerializeField] public float health { get; private set; }
+    [field: SerializeField] public float resistance { get; private set; }
+    [field: SerializeField] public float moveSpeed { get; private set; }
+    [field: SerializeField] public GameObject prefab { get; private set; }
+    [field: SerializeField] public int minWave { get; private set; } // с какой волны может появляться
+    [field: SerializeField] public int maxWave { get; private set; } // до какой волны
 }

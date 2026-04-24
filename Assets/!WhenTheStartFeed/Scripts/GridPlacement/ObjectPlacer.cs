@@ -3,26 +3,71 @@ using UnityEngine;
 
 public class ObjectPlacer : MonoBehaviour
 {
-    // Список всех установленных объектов в сцене.
-    // Хранит ссылки, чтобы можно было удалить объект по индексу.
     [SerializeField] private List<GameObject> placedGameObjects = new();
-    [SerializeField] private Transform _Dynamic; //тут будут лежать все объекты, создаваемые во время игры
+    [SerializeField] private Transform _Dynamic;
 
-    public int PlaceObject(GameObject prefab, Vector3 position)// Создаёт объект по префабу в заданной позиции.
+    private const string TOWER_LAYER_NAME = "Default";
+
+    // ── Сигнатура с towerID, gridCell и rotation ─────────────────────
+    // rotation — поворот из голограммы (игрок мог нажать кнопку Rotate).
+    // Quaternion.identity = поворот по умолчанию из префаба.
+    public int PlaceObject(GameObject prefab, Vector3 position, int towerID, Vector3Int gridCell,
+                           Quaternion rotation = default)
     {
-        GameObject newObject = Instantiate(prefab);
-        newObject.transform.position = position;
+        // default(Quaternion) == (0,0,0,0) — не валидный кватернион, заменяем на identity
+        if (rotation == default)
+            rotation = Quaternion.identity;
+
+        GameObject newObject = Instantiate(prefab, position, rotation);
         newObject.transform.SetParent(_Dynamic);
-        placedGameObjects.Add(newObject);// Сохраняем объект в список, чтобы потом можно было его удалить по индексу
-        return placedGameObjects.Count - 1; // Возвращаем индекс созданного объекта
+
+        SetLayerRecursively(newObject, LayerMask.NameToLayer(TOWER_LAYER_NAME));
+        EnableAllTowerComponents(newObject);
+
+        // Хэндлер ТОЛЬКО на корневом объекте — не AddComponent на детях
+        TowerClickHandler handler = newObject.GetComponent<TowerClickHandler>();
+        if (handler == null)
+            handler = newObject.AddComponent<TowerClickHandler>();
+
+        handler.towerID = towerID;
+        handler.gridCell = gridCell;
+
+        Debug.Log($"PlaceObject: towerID={towerID}, gridCell={gridCell}, rotation={rotation.eulerAngles}, handler на объекте={handler.gameObject.name}");
+
+        placedGameObjects.Add(newObject);
+        return placedGameObjects.Count - 1;
     }
 
-    internal void RemoveObjectAt(int gameObjectIndex) // Удаляет GameObject по его индексу из списка placedGameObjects
+    private void SetLayerRecursively(GameObject obj, int newLayer)
     {
-        if (placedGameObjects.Count <= gameObjectIndex      // проверяем, что индекс, который мы получили, не выходит за пределы списка
-            || placedGameObjects[gameObjectIndex] == null) // что в списке есть объект по этому индексу.
+        if (obj == null) return;
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+            SetLayerRecursively(child.gameObject, newLayer);
+    }
+
+    private void EnableAllTowerComponents(GameObject obj)
+    {
+        Tower tower = obj.GetComponent<Tower>();
+        if (tower != null)
+            tower.enabled = true;
+
+        MonoBehaviour[] scripts = obj.GetComponentsInChildren<MonoBehaviour>();
+        foreach (var script in scripts)
+            script.enabled = true;
+
+        Collider[] colliders = obj.GetComponentsInChildren<Collider>();
+        foreach (var collider in colliders)
+            collider.enabled = true;
+    }
+
+    internal void RemoveObjectAt(int gameObjectIndex)
+    {
+        if (placedGameObjects.Count <= gameObjectIndex
+            || placedGameObjects[gameObjectIndex] == null)
             return;
+
         Destroy(placedGameObjects[gameObjectIndex]);
-        placedGameObjects[gameObjectIndex] = null;      // Зануляем ссылку, чтобы не ломать индексы других объектов
+        placedGameObjects[gameObjectIndex] = null;
     }
 }

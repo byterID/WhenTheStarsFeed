@@ -5,17 +5,18 @@ TagManager:
   serializedVersion: 3
   tags:
   - Enemy
+  - Base
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Placement
+  - PlacementSurface
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Preview
+  - Road
+  - Tower
+  - Base
   - 
   - 
   - 

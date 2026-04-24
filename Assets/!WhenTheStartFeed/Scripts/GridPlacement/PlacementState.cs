@@ -2,36 +2,47 @@ using UnityEngine;
 
 public class PlacementState : IBuildingState
 {
-    private int selectedObjectIndex = -1;       //индекс объекта в базе
-    int ID;                                     // ID выбранного объекта, который пытаемся разместить
+    private int selectedObjectIndex = -1;
+    int ID;
     Grid grid;
     PreviewSystem previewSystem;
-    ObjectsDatabaseSO database;
+    TowersDatabaseSO database;
     GridData floorData;
-    GridData furnitureData;
+    GridData towersData;
     ObjectPlacer objectPlacer;
     SoundFeedback soundFeedback;
+    MoneyManager moneyManager;
+
+    // Поворот — устанавливается из PlacementSystem перед OnAction
+    private Quaternion _placementRotation = Quaternion.identity;
+
+    public void SetPlacementRotation(Quaternion rotation)
+    {
+        _placementRotation = rotation;
+    }
 
     public PlacementState(int iD,
                           Grid grid,
                           PreviewSystem previewSystem,
-                          ObjectsDatabaseSO database,
+                          TowersDatabaseSO database,
                           GridData floorData,
-                          GridData furnitureData,
+                          GridData towersData,
                           ObjectPlacer objectPlacer,
-                          SoundFeedback soundFeedback)
+                          SoundFeedback soundFeedback,
+                          MoneyManager moneyManager)
     {
-        ID = iD;                                //сохраняем id выбранного объекта
-        this.grid = grid;                       //ссылки на нужные сущности
+        ID = iD;
+        this.grid = grid;
         this.previewSystem = previewSystem;
         this.database = database;
         this.floorData = floorData;
-        this.furnitureData = furnitureData;
+        this.towersData = towersData;
         this.objectPlacer = objectPlacer;
         this.soundFeedback = soundFeedback;
+        this.moneyManager = moneyManager;
 
-        selectedObjectIndex = database.objectsData.FindIndex(data => data.ID == ID);    //находим объект в базе по id
-        if (selectedObjectIndex > -1)                                                   // Если объект найден, то запускаем предпросмотр
+        selectedObjectIndex = database.objectsData.FindIndex(data => data.ID == ID);
+        if (selectedObjectIndex > -1)
         {
             previewSystem.StartShowingPlacementPreview(
                 database.objectsData[selectedObjectIndex].Prefab,
@@ -39,51 +50,67 @@ public class PlacementState : IBuildingState
         }
         else
             throw new System.Exception($"No object with ID {iD}");
-        
     }
 
-    public void EndState()      // вызывается, когда режим размещения заканчивается
+    public void EndState()
     {
         previewSystem.StopShowingPreview();
     }
 
-    public void OnAction(Vector3Int gridPosition) // вызывается при клике - попытка разместить объект
+    public void OnAction(Vector3Int gridPosition)
     {
+        // Берём актуальный размер с учётом поворота
+        Vector2Int currentSize = previewSystem.GetCurrentSize();
 
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex); // проверяем, можно ли ставить объект в точку
-        if (placementValidity == false)
+        bool placementValidity = CheckPlacementValidity(gridPosition, currentSize);
+        if (!placementValidity)
         {
-            soundFeedback.PlaySound(SoundType.wrongPlacement);// если нельзя - звук ошибки и выход
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
             return;
         }
-        soundFeedback.PlaySound(SoundType.Place); // если можно - звук размещения
-        int index = objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, // создаём реальный объект и получаем его индекс в ObjectPlacer
-            grid.CellToWorld(gridPosition));
 
-        GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ? //хуйня с туториала ИСПРАВИТЬ!!
-            floorData :
-            furnitureData;
-        selectedData.AddObjectAt(gridPosition,
-            database.objectsData[selectedObjectIndex].Size,
+        int towerCost = database.objectsData[selectedObjectIndex].Cost;
+        if (!moneyManager.TrySpend(towerCost))
+        {
+            Debug.Log("Недостаточно денег! Нужно: " + towerCost + ", есть: " + moneyManager.CurrentMoney);
+            soundFeedback.PlaySound(SoundType.wrongPlacement);
+            return;
+        }
+
+        int index = objectPlacer.PlaceObject(
+            database.objectsData[selectedObjectIndex].Prefab,
+            grid.CellToWorld(gridPosition),
+            database.objectsData[selectedObjectIndex].ID,
+            gridPosition,
+            _placementRotation);
+
+        // Записываем повёрнутый размер — именно он определяет занятые клетки
+        towersData.AddObjectAt(
+            gridPosition,
+            currentSize,
             database.objectsData[selectedObjectIndex].ID,
             index);
 
         previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), false);
+        soundFeedback.PlaySound(SoundType.Place);
+
+        Debug.Log("Башня куплена! Осталось денег: " + moneyManager.CurrentMoney);
     }
 
-    private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)  // Проверяет, можно ли ставить объект в указанную позицию
+    private bool CheckPlacementValidity(Vector3Int gridPosition, Vector2Int size)
     {
-        GridData selectedData = database.objectsData[selectedObjectIndex].ID == 0 ? //ТОЖЕ ХУЙНЯ ИСПРАВИТЬ!
-            floorData :
-            furnitureData;
-
-        return selectedData.CanPlaceObejctAt(gridPosition, database.objectsData[selectedObjectIndex].Size);
+        if (!towersData.CanPlaceObejctAt(gridPosition, size))
+            return false;
+        if (!floorData.CanPlaceObejctAt(gridPosition, size))
+            return false;
+        return true;
     }
 
-    public void UpdateState(Vector3Int gridPosition) // Вызывается каждый кадр при перемещении курсора по сетке
+    public void UpdateState(Vector3Int gridPosition)
     {
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);// Проверяем валидность размещения
-
-        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), placementValidity);// Обновляем предпросмотр
+        // Берём актуальный размер с учётом поворота для проверки валидности
+        Vector2Int currentSize = previewSystem.GetCurrentSize();
+        bool placementValidity = CheckPlacementValidity(gridPosition, currentSize);
+        previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), placementValidity);
     }
 }
