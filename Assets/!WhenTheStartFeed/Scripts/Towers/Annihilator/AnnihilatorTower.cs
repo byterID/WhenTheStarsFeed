@@ -136,6 +136,7 @@ public class AnnihilatorTower : MonoBehaviour
             // ── 1. Зарядка ────────────────────────────────────────────
             SetState(AnnihilatorState.Charging);
             PlayVFX(_chargeVFX);
+            _soundFeedback?.PlayAnnihilatorCharge();
             yield return new WaitForSeconds(_chargeTime);
 
             // После зарядки проверяем — вдруг зона опустела пока заряжались
@@ -149,6 +150,7 @@ public class AnnihilatorTower : MonoBehaviour
             SetState(AnnihilatorState.Firing);
             StopVFX(_chargeVFX);
             PlayVFX(_fireVFX);
+            _soundFeedback?.StartFlamethrower();
 
             float fireElapsed = 0f;
             while (fireElapsed < _fireTime)
@@ -161,6 +163,7 @@ public class AnnihilatorTower : MonoBehaviour
             // ── 3. Перезарядка ────────────────────────────────────────
             SetState(AnnihilatorState.Reloading);
             StopVFX(_fireVFX);
+            _soundFeedback?.StopFlamethrower();
             yield return new WaitForSeconds(_reloadTime);
 
             // ── 4. Проверяем есть ли ещё враги ───────────────────────
@@ -207,6 +210,7 @@ public class AnnihilatorTower : MonoBehaviour
     {
         StopVFX(_chargeVFX);
         StopVFX(_fireVFX);
+        _soundFeedback?.StopFlamethrower();
     }
 }
 

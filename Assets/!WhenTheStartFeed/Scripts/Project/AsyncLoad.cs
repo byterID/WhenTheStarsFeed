@@ -28,5 +28,6 @@ public class AsyncLoad : MonoBehaviour
             loadingSlider.value = progressValue;
             yield return null;
         }
+        ServiceLocator.TryGet<SoundFeedback>()?.PlayGameMusic();
     }
 }

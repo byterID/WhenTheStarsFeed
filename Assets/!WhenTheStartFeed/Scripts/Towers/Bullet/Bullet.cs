@@ -70,6 +70,9 @@ public class Bullet : MonoBehaviour
 
     private const float MAX_LIFETIME = 8f;
 
+    // Звук — попадание пули
+    private SoundFeedback _soundFeedback;
+
     // ── Lifecycle ─────────────────────────────────────────────────────
 
     /// <summary>
@@ -85,6 +88,8 @@ public class Bullet : MonoBehaviour
 
         _targetRigidbody = target != null ? target.GetComponent<Rigidbody>() : null;
         _hitDistance = Mathf.Max(0.35f, _speed * Time.fixedDeltaTime * 1.5f);
+
+        _soundFeedback = ServiceLocator.TryGet<SoundFeedback>();
 
         if (_rotateToTarget && _target != null)
             transform.LookAt(GetAimPoint());
@@ -175,6 +180,7 @@ public class Bullet : MonoBehaviour
         }
 
         SpawnHitVFX();
+        _soundFeedback?.PlayBulletHit();
         CleanupAndDestroy();
     }
 
