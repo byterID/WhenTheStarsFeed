@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ba41c7b4d4a43d42afe12d56db26e1f, type: 3}
+  m_Name: WavesDatabaseSO
+  m_EditorClassIdentifier: Assembly-CSharp::WavesDatabaseSO
+  waveDatabase:
+  - <waveIndex>k__BackingField: 0
+    <preparationTime>k__BackingField: 10
+    <timeToNextWave>k__BackingField: 40
+    squads:
+    - enemyData:
+        <enemyName>k__BackingField: "\u0411\u043E\u043C\u0436"
+        <ID>k__BackingField: 1
+        <health>k__BackingField: 10
+        <resistance>k__BackingField: 3
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 0
+        <maxWave>k__BackingField: 3
+      count: 5
+      density: 0.5
+  - <waveIndex>k__BackingField: 1
+    <preparationTime>k__BackingField: 5
+    <timeToNextWave>k__BackingField: 40
+    squads:
+    - enemyData:
+        <enemyName>k__BackingField: "\u0411\u043E\u043C\u0436"
+        <ID>k__BackingField: 1
+        <health>k__BackingField: 10
+        <resistance>k__BackingField: 3
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 0
+        <maxWave>k__BackingField: 3
+      count: 5
+      density: 0.5
+  - <waveIndex>k__BackingField: 2
+    <preparationTime>k__BackingField: 10
+    <timeToNextWave>k__BackingField: 40
+    squads:
+    - enemyData:
+        <enemyName>k__BackingField: "\u0411\u043E\u043C\u0436"
+        <ID>k__BackingField: 1
+        <health>k__BackingField: 10
+        <resistance>k__BackingField: 3
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 0
+        <maxWave>k__BackingField: 3
+      count: 5
+      density: 0.5
+  - <waveIndex>k__BackingField: 3
+    <preparationTime>k__BackingField: 5
+    <timeToNextWave>k__BackingField: 40
+    squads:
+    - enemyData:
+        <enemyName>k__BackingField: "\u0411\u043E\u043C\u0436"
+        <ID>k__BackingField: 1
+        <health>k__BackingField: 10
+        <resistance>k__BackingField: 3
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 0
+        <maxWave>k__BackingField: 3
+      count: 5
+      density: 0.5
+    - enemyData:
+        <enemyName>k__BackingField: "\u0420\u044B\u0446\u0430\u0440\u044C"
+        <ID>k__BackingField: 2
+        <health>k__BackingField: 20
+        <resistance>k__BackingField: 8
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 3
+        <maxWave>k__BackingField: 5
+      count: 5
+      density: 0.5
+  - <waveIndex>k__BackingField: 4
+    <preparationTime>k__BackingField: 5
+    <timeToNextWave>k__BackingField: 40
+    squads:
+    - enemyData:
+        <enemyName>k__BackingField: "\u0420\u044B\u0446\u0430\u0440\u044C"
+        <ID>k__BackingField: 2
+        <health>k__BackingField: 20
+        <resistance>k__BackingField: 8
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 3
+        <maxWave>k__BackingField: 5
+      count: 5
+      density: 0.5
+  - <waveIndex>k__BackingField: 5
+    <preparationTime>k__BackingField: 5
+    <timeToNextWave>k__BackingField: 40
+    squads:
+    - enemyData:
+        <enemyName>k__BackingField: "\u0420\u044B\u0446\u0430\u0440\u044C"
+        <ID>k__BackingField: 2
+        <health>k__BackingField: 20
+        <resistance>k__BackingField: 8
+        <moveSpeed>k__BackingField: 1
+        <prefab>k__BackingField: {fileID: 6163871096512238772, guid: 7011a233102d3454dbc96c97ebebef89, type: 3}
+        <minWave>k__BackingField: 3
+        <maxWave>k__BackingField: 5
+      count: 5
+      density: 0.5
